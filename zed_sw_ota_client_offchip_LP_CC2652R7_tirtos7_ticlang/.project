@@ -156,11 +156,6 @@
 			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/common/cui/cui.h</locationURI>
 		</link>
 		<link>
-			<name>Application/ui/zcl_sample_app_def.h</name>
-			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/apps/sw/zcl_sample_app_def.h</locationURI>
-		</link>
-		<link>
 			<name>Application/ui/zcl_sampleapps_ui.c</name>
 			<type>1</type>
 			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/stack/ui/zcl_sampleapps_ui.c</locationURI>
