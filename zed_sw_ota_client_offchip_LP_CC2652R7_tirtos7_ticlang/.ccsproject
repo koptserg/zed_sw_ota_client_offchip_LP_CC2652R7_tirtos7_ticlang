@@ -16,4 +16,5 @@
 	<templateProperties value="id=zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang.projectspec.zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang,buildProfile=release,isHybrid=true"/>
 	<origin value="C:\ti\simplelink_cc13xx_cc26xx_sdk_7_10_01_24\examples\rtos\LP_CC2652R7\zstack\zed_sw_ota_client_offchip\tirtos7\ticlang\zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang.projectspec"/>
 	<filesToOpen value="README.html"/>
+	<isTargetManual value="false"/>
 </projectOptions>

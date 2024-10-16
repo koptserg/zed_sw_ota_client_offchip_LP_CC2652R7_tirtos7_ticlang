@@ -168,7 +168,7 @@
 									<listOptionValue builtIn="false" value="HEAPMGR_SIZE=0x00"/>
 									<listOptionValue builtIn="false" value="BH1750"/>
 									<listOptionValue builtIn="false" value="BME280"/>
-									<listOptionValue builtIn="false" value="xEPD1IN54V2"/>
+									<listOptionValue builtIn="false" value="EPD1IN54V2"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_TICLANG_2.1.compilerID.GENERATE_DWARF_DEBUG.139311468" name="Generate DWARF debug" superClass="com.ti.ccstudio.buildDefinitions.TMS470_TICLANG_2.1.compilerID.GENERATE_DWARF_DEBUG" value="com.ti.ccstudio.buildDefinitions.TMS470_TICLANG_2.1.compilerID.GENERATE_DWARF_DEBUG.GDWARF_3" valueType="enumerated"/>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_TICLANG_2.1.compilerID.STD_C.595616639" name="Select assumed C language standard (-std)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_TICLANG_2.1.compilerID.STD_C" value="com.ti.ccstudio.buildDefinitions.TMS470_TICLANG_2.1.compilerID.STD_C.gnu9x" valueType="enumerated"/>
