@@ -1,7 +1,7 @@
 ******************************************************************************
             TI ARM Clang Linker PC v2.1.3                      
 ******************************************************************************
->> Linked Thu Oct 17 02:00:51 2024
+>> Linked Thu Oct 17 02:07:01 2024
 
 OUTPUT FILE NAME:   <zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang.out>
 ENTRY POINT SYMBOL: "ResetISR"  address: 0002ccb3
@@ -2911,7 +2911,7 @@ MODULE SUMMARY
     +--+-----------------------------------------------+--------+---------+---------+
        Total:                                          4134     376       867    
                                                                                  
-    .\Application\sw\
+    .\Application\source\
        zcl_samplesw.o                                  5932     569       269    
        epdpaint.o                                      680      0         5020   
        font48.o                                        0        4032      8      
