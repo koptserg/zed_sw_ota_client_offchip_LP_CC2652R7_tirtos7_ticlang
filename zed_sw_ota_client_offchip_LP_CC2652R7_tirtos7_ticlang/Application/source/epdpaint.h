@@ -14,7 +14,7 @@
 #define COLORED     0
 #define UNCOLORED   1
 
-#include "fonts.h"
+#include <Application/source/fonts.h>
 
 extern    void PaintPaint(unsigned char* image, int width, int height);
 extern    void PaintClear(int colored);

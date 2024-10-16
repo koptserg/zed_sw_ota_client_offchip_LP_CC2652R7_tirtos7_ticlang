@@ -3,7 +3,7 @@
 
 #ifdef EPD1IN54V2
 
-#include "zcl_samplesw.h"
+#include <Application/source/zcl_samplesw.h>
 #if defined (OTA_CLIENT_INTEGRATED)
 #include "zcl_ota.h"
 #include "ota_client.h"
@@ -24,9 +24,9 @@
 
 #include <ti/drivers/SPI.h>
 
-#include "epd1in54v2.h"
-#include "imagedata.h"
-#include "epdpaint.h"
+#include <Application/source/epd1in54v2.h>
+#include <Application/source/imagedata.h>
+#include <Application/source/epdpaint.h>
 
 #define EPD1IN54V2_TASK_STACK_SIZE 3000
 

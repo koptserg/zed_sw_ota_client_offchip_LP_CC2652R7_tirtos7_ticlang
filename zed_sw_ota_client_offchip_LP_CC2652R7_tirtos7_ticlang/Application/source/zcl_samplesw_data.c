@@ -67,6 +67,7 @@
 /*********************************************************************
  * INCLUDES
  */
+#include <Application/source/version.h>
 #include "zcomdef.h"
 #include "zcl.h"
 #include "zcl_general.h"
@@ -83,14 +84,13 @@
 #include "zcl_hvac.h"
 
 #include "zcl_ms.h"
-#include "version.h"
 
 #ifdef OTA_CLIENT_INTEGRATED
 #include "ota_client.h"
 #include "zcl_ota.h"
 #endif
 
-#include "zcl_samplesw.h"
+#include <Application/source/zcl_samplesw.h>
 
 /*********************************************************************
  * CONSTANTS

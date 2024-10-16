@@ -61,7 +61,7 @@
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **************************************************************************************************/
 
-#include "zcl_samplesw.h"
+#include <Application/source/zcl_samplesw.h>
 
 #ifndef APPLICATION_UI_ZCL_SAMPLE_APP_DEF_H_
 #define APPLICATION_UI_ZCL_SAMPLE_APP_DEF_H_

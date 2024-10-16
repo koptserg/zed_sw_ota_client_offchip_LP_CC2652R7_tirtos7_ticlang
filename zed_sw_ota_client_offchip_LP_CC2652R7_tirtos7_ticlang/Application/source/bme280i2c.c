@@ -1,6 +1,6 @@
 
 #ifdef BME280
-#include "bme280i2c.h"
+#include <Application/source/bme280i2c.h>
 #include "ti_drivers_config.h"
 // Import I2C Driver definitions
 #include <ti/drivers/I2C.h>

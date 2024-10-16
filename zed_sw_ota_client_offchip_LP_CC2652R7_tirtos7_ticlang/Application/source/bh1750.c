@@ -1,5 +1,6 @@
+
 #ifdef BH1750
-#include "bh1750.h"
+#include <Application/source/bh1750.h>
 #include "ti_drivers_config.h"
 // Import I2C Driver definitions
 #include <ti/drivers/I2C.h>
