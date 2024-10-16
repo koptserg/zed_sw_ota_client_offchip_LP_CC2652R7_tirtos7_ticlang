@@ -8,5 +8,7 @@
 2. Go to step 1 for FN device
 
 # Hardware
-![](/images/photo_2021-07-11_18-00-41.jpg)
-![](/images/photo_2021-07-11_18-02-03.jpg)
+![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/photo_2024-10-16_21-50-46.jpg)
+![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/Screenshot_2157.jpg)
+![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/Screenshot_2155.jpg)
+![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/Screenshot_2156.jpg)
