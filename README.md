@@ -16,7 +16,7 @@
 3. EPD1IN54 - SPI (SCLK-DIO30, MOSI-DIO28, CS-DIO11, BUSY-DIO1, RST-DIO0, DC-DIO12) 
 
 ![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/Screenshot_2154.jpg)
-![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/photo_2024-10-17_14-10-21.jpg)
+![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/photo_2024-10-17_15-03-37.jpg)
 ![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/Screenshot_2158.jpg)
 ![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/Screenshot_2155.jpg)
 ![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/Screenshot_2156.jpg)
