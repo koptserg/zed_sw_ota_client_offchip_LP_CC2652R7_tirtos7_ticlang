@@ -20,3 +20,4 @@
 ![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/Screenshot_2158.jpg)
 ![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/Screenshot_2155.jpg)
 ![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/Screenshot_2156.jpg)
+![](/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/images/Screenshot_2159.jpg)
