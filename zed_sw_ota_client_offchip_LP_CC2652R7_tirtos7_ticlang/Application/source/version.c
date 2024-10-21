@@ -6,9 +6,10 @@
     extern "C" {
     #endif
 
-    #include <Application/source/version.h>
-const uint8 zclApp_DateCode[] = { 16, '1', '6', '/', '1', '0', '/', '2', '0', '2', '4', ' ', '1', '9', ':', '0', '4' };
-const char zclApp_DateCodeNT[] = "16/10/2024 19:04";
+    #include "version.h"
+const uint32_t zclSampleSw_CurrentFileVersion = 0x671681c0;
+const uint8_t zclApp_DateCode[] = { 16, '2', '1', '/', '1', '0', '/', '2', '0', '2', '4', ' ', '2', '1', ':', '3', '0' };
+const char zclApp_DateCodeNT[] = "21/10/2024 21:30";
 
     #ifdef __cplusplus
     }
