@@ -1,7 +1,7 @@
 ******************************************************************************
             TI ARM Clang Linker PC v2.1.3                      
 ******************************************************************************
->> Linked Mon Oct 21 22:31:58 2024
+>> Linked Mon Oct 21 22:33:43 2024
 
 OUTPUT FILE NAME:   <zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang.out>
 ENTRY POINT SYMBOL: "ResetISR"  address: 0002b6ef
