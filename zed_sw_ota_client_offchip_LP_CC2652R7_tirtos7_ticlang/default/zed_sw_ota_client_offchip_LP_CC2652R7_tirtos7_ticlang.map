@@ -1,7 +1,7 @@
 ******************************************************************************
             TI ARM Clang Linker PC v2.1.3                      
 ******************************************************************************
->> Linked Mon Oct 21 22:33:43 2024
+>> Linked Mon Oct 21 22:42:00 2024
 
 OUTPUT FILE NAME:   <zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang.out>
 ENTRY POINT SYMBOL: "ResetISR"  address: 0002b6ef
@@ -2205,8 +2205,7 @@ config_const
                   0002e4f1    00000001     zcl_samplesw_data.o (.rodata.zclSampleSw_ZCLVersion)
 
 .cinit     0    0002e5c4    00000448     
-                  0002e5c4    00000362     (.cinit..data.load) [load image, compression = lzss]
-                  0002e926    00000002     --HOLE-- [fill = 0]
+                  0002e5c4    00000364     (.cinit..data.load) [load image, compression = lzss]
                   0002e928    0000000c     (__TI_handler_table)
                   0002e934    00000008     (.cinit..TI.bound:dmaSpi0RxAltControlTableEntry.load) [load image, compression = zero_init]
                   0002e93c    00000008     (.cinit..TI.bound:dmaSpi0RxControlTableEntry.load) [load image, compression = zero_init]
@@ -3090,15 +3089,15 @@ MODULE SUMMARY
        Total:                                          1856     0         0      
                                                                                  
        Stack:                                          0        0         1024   
-       Linker Generated:                               8        1094      0      
+       Linker Generated:                               8        1096      0      
     +--+-----------------------------------------------+--------+---------+---------+
-       Grand Total:                                    177862   13057     39654  
+       Grand Total:                                    177862   13059     39654  
 
 
 LINKER GENERATED COPY TABLES
 
 __TI_cinit_table @ 0002e99c records: 14, size/record: 8, table size: 112
-	.data: load addr=0002e5c4, load size=00000362 bytes, run addr=20001cd8, run size=0000101b bytes, compression=lzss
+	.data: load addr=0002e5c4, load size=00000364 bytes, run addr=20001cd8, run size=0000101b bytes, compression=lzss
 	.TI.bound:dmaSpi0RxAltControlTableEntry: load addr=0002e934, load size=00000008 bytes, run addr=20001a30, run size=00000010 bytes, compression=zero_init
 	.TI.bound:dmaSpi0RxControlTableEntry: load addr=0002e93c, load size=00000008 bytes, run addr=20001830, run size=00000010 bytes, compression=zero_init
 	.TI.bound:dmaSpi0TxAltControlTableEntry: load addr=0002e944, load size=00000008 bytes, run addr=20001a40, run size=00000010 bytes, compression=zero_init
