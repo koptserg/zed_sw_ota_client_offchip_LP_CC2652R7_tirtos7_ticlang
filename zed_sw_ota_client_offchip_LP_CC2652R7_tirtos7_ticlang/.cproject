@@ -161,7 +161,7 @@
 									<listOptionValue builtIn="false" value="OTA_CLIENT_INTEGRATED"/>
 									<listOptionValue builtIn="false" value="SECURITY"/>
 									<listOptionValue builtIn="false" value="OTA_MANUFACTURER_ID=0xBEBE"/>
-									<listOptionValue builtIn="false" value="xOTA_APP_VERSION=0x00000001"/>
+									<listOptionValue builtIn="false" value="OTA_APP_VERSION=0x00000001"/>
 									<listOptionValue builtIn="false" value="OTA_TYPE_ID=0x2652"/>
 									<listOptionValue builtIn="false" value="TIRTOS7_SUPPORT"/>
 									<listOptionValue builtIn="false" value="HEAPMGR_CONFIG=0x80"/>

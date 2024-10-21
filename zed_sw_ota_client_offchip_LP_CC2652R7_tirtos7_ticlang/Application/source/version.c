@@ -7,9 +7,8 @@
     #endif
 
     #include "version.h"
-const uint32_t zclSampleSw_CurrentFileVersion = 0x671681c0;
-const uint8_t zclApp_DateCode[] = { 16, '2', '1', '/', '1', '0', '/', '2', '0', '2', '4', ' ', '2', '1', ':', '3', '0' };
-const char zclApp_DateCodeNT[] = "21/10/2024 21:30";
+const uint8_t zclApp_DateCode[] = { 16, '2', '1', '/', '1', '0', '/', '2', '0', '2', '4', ' ', '2', '2', ':', '3', '1' };
+const char zclApp_DateCodeNT[] = "21/10/2024 22:31";
 
     #ifdef __cplusplus
     }
