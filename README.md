@@ -19,6 +19,7 @@
 
 # Firmware
 ![](/images/Screenshot_2203.jpg)
+After loading the project, change the path to the zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang-master folder in the PROJ_LOC variable.
 ![](/images/Screenshot_2154.jpg)
 ![](/images/Screenshot_2158.jpg)
 ![](/images/Screenshot_2155.jpg)
