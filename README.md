@@ -19,17 +19,22 @@
 
 # Firmware
 ![](/images/Screenshot_2203.jpg)
+
 After loading the project, change the path to the zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang-master folder in the PROJ_LOC variable.
 
 ![](/images/Screenshot_2154.jpg)
+
 UniFlash firmware.
 
 ![](/images/Screenshot_2158.jpg)
+
 Debugging in Putty with xCUI_DISABLE.
 
 ![](/images/Screenshot_2155.jpg)
 ![](/images/Screenshot_2156.jpg)
+
 Dashboard and Exposes in Zigbee2MQTT.
 
 ![](/images/Screenshot_2159.jpg)
+
 OTA process
