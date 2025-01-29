@@ -15,8 +15,11 @@
 2. BME280, BH1750 - I2C (SDA-DIO5, SCL-DIO4)
 3. EPD1IN54 - SPI (SCLK-DIO30, MOSI-DIO28, CS-DIO11, BUSY-DIO1, RST-DIO0, DC-DIO12) 
 
-![](/images/Screenshot_2154.jpg)
 ![](/images/photo_2024-10-17_15-03-37.jpg)
+
+# Firmware
+![](/images/Screenshot_2203.jpg)
+![](/images/Screenshot_2154.jpg)
 ![](/images/Screenshot_2158.jpg)
 ![](/images/Screenshot_2155.jpg)
 ![](/images/Screenshot_2156.jpg)
