@@ -38,7 +38,7 @@
 		<link>
 			<name>Application/source</name>
 			<type>2</type>
-			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/source</location>
+			<locationURI>PROJ_LOC/source</locationURI>
 		</link>
 		<link>
 			<name>Application/Services/crc.c</name>
@@ -143,12 +143,12 @@
 		<link>
 			<name>Application/ota/ota_client.c</name>
 			<type>1</type>
-			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/ota/ota_client.c</location>
+			<locationURI>PROJ_LOC/ota/ota_client.c</locationURI>
 		</link>
 		<link>
 			<name>Application/ota/ota_client.h</name>
 			<type>1</type>
-			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/ota/ota_client.h</location>
+			<locationURI>PROJ_LOC/ota/ota_client.h</locationURI>
 		</link>
 		<link>
 			<name>Application/ui/cui.c</name>
@@ -163,17 +163,17 @@
 		<link>
 			<name>Application/ui/zcl_sample_app_def.h</name>
 			<type>1</type>
-			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/source/zcl_sample_app_def.h</location>
+			<locationURI>PROJ_LOC/source/zcl_sample_app_def.h</locationURI>
 		</link>
 		<link>
 			<name>Application/ui/zcl_sampleapps_ui.c</name>
 			<type>1</type>
-			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/ui/zcl_sampleapps_ui.c</location>
+			<locationURI>PROJ_LOC/ui/zcl_sampleapps_ui.c</locationURI>
 		</link>
 		<link>
 			<name>Application/ui/zcl_sampleapps_ui.h</name>
 			<type>1</type>
-			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/ui/zcl_sampleapps_ui.h</location>
+			<locationURI>PROJ_LOC/ui/zcl_sampleapps_ui.h</locationURI>
 		</link>
 		<link>
 			<name>Application/util/mac_util.c</name>
@@ -1071,4 +1071,10 @@
 			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/ti154stack/low_level/cc13xx/mac_tx.h</locationURI>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>PROJ_LOC</name>
+			<value>file:/C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang</value>
+		</variable>
+	</variableList>
 </projectDescription>
