@@ -143,12 +143,12 @@
 		<link>
 			<name>Application/ota/ota_client.c</name>
 			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/ota/ota_client.c</locationURI>
+			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/ota/ota_client.c</location>
 		</link>
 		<link>
 			<name>Application/ota/ota_client.h</name>
 			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/ota/ota_client.h</locationURI>
+			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/ota/ota_client.h</location>
 		</link>
 		<link>
 			<name>Application/ui/cui.c</name>
@@ -163,17 +163,17 @@
 		<link>
 			<name>Application/ui/zcl_sample_app_def.h</name>
 			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/apps/sw/zcl_sample_app_def.h</locationURI>
+			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/source/zcl_sample_app_def.h</location>
 		</link>
 		<link>
 			<name>Application/ui/zcl_sampleapps_ui.c</name>
 			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/stack/ui/zcl_sampleapps_ui.c</locationURI>
+			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/ui/zcl_sampleapps_ui.c</location>
 		</link>
 		<link>
 			<name>Application/ui/zcl_sampleapps_ui.h</name>
 			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/stack/ui/zcl_sampleapps_ui.h</locationURI>
+			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/ui/zcl_sampleapps_ui.h</location>
 		</link>
 		<link>
 			<name>Application/util/mac_util.c</name>
