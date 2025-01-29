@@ -1,6 +1,5 @@
-
-#include <Application/source/fonts.h>
-//#include <avr/pgmspace.h>
+//#include <Application/source/fonts.h>
+#include <fonts.h>
 
 const uint8 Font48_Table [] = 
 {

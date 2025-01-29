@@ -1,5 +1,6 @@
 
-#include <Application/source/epdpaint.h>
+//#include <Application/source/epdpaint.h>
+#include <epdpaint.h>
 
 unsigned char image[];
 unsigned char* pimage;

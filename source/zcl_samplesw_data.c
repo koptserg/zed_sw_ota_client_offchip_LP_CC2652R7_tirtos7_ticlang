@@ -67,7 +67,8 @@
 /*********************************************************************
  * INCLUDES
  */
-#include <Application/source/version.h>
+//#include <Application/source/version.h>
+#include <Application/version.h>
 #include "zcomdef.h"
 #include "zcl.h"
 #include "zcl_general.h"
@@ -90,7 +91,8 @@
 #include "zcl_ota.h"
 #endif
 
-#include <Application/source/zcl_samplesw.h>
+//#include <Application/source/zcl_samplesw.h>
+#include <zcl_samplesw.h>
 
 /*********************************************************************
  * CONSTANTS

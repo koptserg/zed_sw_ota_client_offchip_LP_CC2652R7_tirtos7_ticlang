@@ -1,5 +1,5 @@
-#include <Application/source/fonts.h>
-//#include <avr/pgmspace.h>
+//#include <Application/source/fonts.h>
+#include <fonts.h>
 
 // 
 //  Font data for Courier New 12pt

@@ -101,15 +101,18 @@
 #include "zcl_ha.h"
 #include "zcl_ms.h"
 
-#include <Application/source/version.h>
+//#include <Application/source/version.h>
+#include <Application/version.h>
 #include "utc_clock.h"
 
-#include <Application/source/zcl_samplesw.h>
+//#include <Application/source/zcl_samplesw.h>
+#include <zcl_samplesw.h>
 #include "zcl_diagnostic.h"
 #include <string.h>
 
 #include "zcl_sampleapps_ui.h"
-#include <Application/source/zcl_sample_app_def.h>
+//#include <Application/source/zcl_sample_app_def.h>
+#include <zcl_sample_app_def.h>
 #include "bdb_interface.h"
 #include "nwk_util.h"
 
@@ -138,15 +141,20 @@
 #include <ti/drivers/ADC.h>
 #include "util_timer.h"
 #ifdef BH1750
-#include <Application/source/bh1750.h>
+//#include <Application/source/bh1750.h>
+#include <bh1750.h>
 #endif
 #ifdef BME280
-#include <Application/source/bme280i2c.h>
+//#include <Application/source/bme280i2c.h>
+#include <bme280i2c.h>
 #endif
 #ifdef EPD1IN54V2
-#include <Application/source/epd1in54v2.h>
-#include <Application/source/imagedata.h>
-#include <Application/source/epdpaint.h>
+//#include <Application/source/epd1in54v2.h>
+//#include <Application/source/imagedata.h>
+//#include <Application/source/epdpaint.h>
+#include <epd1in54v2.h>
+#include <imagedata.h>
+#include <epdpaint.h>
 #endif
 #include "ti_zstack_config.h"
 #if !defined (DISABLE_GREENPOWER_BASIC_PROXY) && (ZG_BUILD_RTR_TYPE)

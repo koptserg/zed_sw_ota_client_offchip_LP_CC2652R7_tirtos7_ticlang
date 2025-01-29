@@ -1,6 +1,6 @@
+//#include <Application/source/imagedata.h>
+#include <imagedata.h>
 
-#include <Application/source/imagedata.h>
-//#include <avr/pgmspace.h>
 #if defined(EPD2IN9) || defined(EPD2IN9V2)
 const unsigned char IMAGE_DATA[] = {
 /* 0X00,0X01,0X80,0X00,0X28,0X01, */
