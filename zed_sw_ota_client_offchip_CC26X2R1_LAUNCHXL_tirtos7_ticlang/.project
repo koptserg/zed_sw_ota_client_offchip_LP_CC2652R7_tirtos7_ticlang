@@ -143,12 +143,12 @@
 		<link>
 			<name>Application/ota/ota_client.c</name>
 			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/ota/ota_client.c</locationURI>
+			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/ota/ota_client.c</location>
 		</link>
 		<link>
 			<name>Application/ota/ota_client.h</name>
 			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/ota/ota_client.h</locationURI>
+			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/ota/ota_client.h</location>
 		</link>
 		<link>
 			<name>Application/ui/cui.c</name>
