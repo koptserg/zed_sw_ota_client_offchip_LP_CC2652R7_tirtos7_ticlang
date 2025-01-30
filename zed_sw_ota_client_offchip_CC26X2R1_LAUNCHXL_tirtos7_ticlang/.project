@@ -36,74 +36,9 @@
 			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/boards/cc13x2_cc26x2/cc13x2_cc26x2_ota_tirtos7_ticlang.cmd</locationURI>
 		</link>
 		<link>
-			<name>Application/bh1750.c</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/bh1750.c</location>
-		</link>
-		<link>
-			<name>Application/bh1750.h</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/bh1750.h</location>
-		</link>
-		<link>
-			<name>Application/bme280i2c.c</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/bme280i2c.c</location>
-		</link>
-		<link>
-			<name>Application/bme280i2c.h</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/bme280i2c.h</location>
-		</link>
-		<link>
-			<name>Application/epd1in54v2.c</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/epd1in54v2.c</location>
-		</link>
-		<link>
-			<name>Application/epd1in54v2.h</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/epd1in54v2.h</location>
-		</link>
-		<link>
-			<name>Application/epdpaint.c</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/epdpaint.c</location>
-		</link>
-		<link>
-			<name>Application/epdpaint.h</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/epdpaint.h</location>
-		</link>
-		<link>
-			<name>Application/font16.c</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/font16.c</location>
-		</link>
-		<link>
-			<name>Application/font32.c</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/font32.c</location>
-		</link>
-		<link>
-			<name>Application/font48.c</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/font48.c</location>
-		</link>
-		<link>
-			<name>Application/fonts.h</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/fonts.h</location>
-		</link>
-		<link>
-			<name>Application/imagedata.c</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/imagedata.c</location>
-		</link>
-		<link>
-			<name>Application/imagedata.h</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/imagedata.h</location>
+			<name>Application/source</name>
+			<type>2</type>
+			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/source</location>
 		</link>
 		<link>
 			<name>Application/version.c</name>
@@ -114,21 +49,6 @@
 			<name>Application/version.h</name>
 			<type>1</type>
 			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/version.h</location>
-		</link>
-		<link>
-			<name>Application/zcl_samplesw.c</name>
-			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/apps/sw/zcl_samplesw.c</locationURI>
-		</link>
-		<link>
-			<name>Application/zcl_samplesw.h</name>
-			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/apps/sw/zcl_samplesw.h</locationURI>
-		</link>
-		<link>
-			<name>Application/zcl_samplesw_data.c</name>
-			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/apps/sw/zcl_samplesw_data.c</locationURI>
 		</link>
 		<link>
 			<name>Application/Services/crc.c</name>
