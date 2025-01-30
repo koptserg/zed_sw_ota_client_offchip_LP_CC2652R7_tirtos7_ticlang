@@ -41,16 +41,6 @@
 			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/source</location>
 		</link>
 		<link>
-			<name>Application/version.c</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/version.c</location>
-		</link>
-		<link>
-			<name>Application/version.h</name>
-			<type>1</type>
-			<location>C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/version.h</location>
-		</link>
-		<link>
 			<name>Application/Services/crc.c</name>
 			<type>1</type>
 			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/common/nv/crc.c</locationURI>

@@ -4,7 +4,7 @@ cwd = dirname(__file__)
 now = datetime.now()
 dt_string = now.strftime("%d/%m/%Y %H:%M")
 print("date and time =", dt_string)
-with open(join(cwd, 'C:/ti/simplelink_cc13xx_cc26xx_sdk_7_10_01_24/source/ti/zstack/apps/sw/version.c'), 'w') as f:
+with open(join(cwd, './Application/version.c'), 'w') as f:
     chars = ["'{0}'".format(char) for char in dt_string]
     f.write("""
     #ifndef ZCL_APP_VERSION_H
