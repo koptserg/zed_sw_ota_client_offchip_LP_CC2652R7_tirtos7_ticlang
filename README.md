@@ -18,7 +18,7 @@
 ![](/images/photo_2024-10-17_15-03-37.jpg)
 
 # Firmware
-### After loading the project, change the path to the zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang-master folder in the PROJ_LOC variable.
+### After  loading the project, change the path to the zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang-master folder in the PROJ_LOC variable.
 ![](/images/Screenshot_2203.jpg)
 ### UniFlash firmware.
 ![](/images/Screenshot_2154.jpg)
