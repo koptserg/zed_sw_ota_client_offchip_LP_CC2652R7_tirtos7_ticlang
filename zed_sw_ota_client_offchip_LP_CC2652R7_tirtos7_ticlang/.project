@@ -78,17 +78,17 @@
 		<link>
 			<name>Application/StartUp/main.c</name>
 			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/startup/main.c</locationURI>
+			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/startup/main.c</location>
 		</link>
 		<link>
 			<name>Application/StartUp/zstackstartup.c</name>
 			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/startup/zstackstartup.c</locationURI>
+			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/startup/zstackstartup.c</location>
 		</link>
 		<link>
 			<name>Application/StartUp/zstackstartup.h</name>
 			<type>1</type>
-			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/startup/zstackstartup.h</locationURI>
+			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/startup/zstackstartup.h</location>
 		</link>
 		<link>
 			<name>Application/ZStackApi/zstackapi.c</name>
