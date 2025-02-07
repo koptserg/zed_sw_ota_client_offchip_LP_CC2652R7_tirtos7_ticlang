@@ -36,11 +36,6 @@
 			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/zstack/boards/cc13x2x7_cc26x2x7/cc13x2x7_cc26x2x7_ota_offchip_tirtos7_ticlang.cmd</locationURI>
 		</link>
 		<link>
-			<name>Application/source</name>
-			<type>2</type>
-			<locationURI>PROJ_LOC/source</locationURI>
-		</link>
-		<link>
 			<name>Application/Services/crc.c</name>
 			<type>1</type>
 			<locationURI>COM_TI_SIMPLELINK_CC13XX_CC26XX_SDK_INSTALL_DIR/source/ti/common/nv/crc.c</locationURI>
@@ -78,17 +73,17 @@
 		<link>
 			<name>Application/StartUp/main.c</name>
 			<type>1</type>
-			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/startup/main.c</location>
+			<locationURI>PROJ_LOC/startup/main.c</locationURI>
 		</link>
 		<link>
 			<name>Application/StartUp/zstackstartup.c</name>
 			<type>1</type>
-			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/startup/zstackstartup.c</location>
+			<locationURI>PROJ_LOC/startup/zstackstartup.c</locationURI>
 		</link>
 		<link>
 			<name>Application/StartUp/zstackstartup.h</name>
 			<type>1</type>
-			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/startup/zstackstartup.h</location>
+			<locationURI>PROJ_LOC/startup/zstackstartup.h</locationURI>
 		</link>
 		<link>
 			<name>Application/ZStackApi/zstackapi.c</name>
@@ -149,6 +144,106 @@
 			<name>Application/ota/ota_client.h</name>
 			<type>1</type>
 			<locationURI>PROJ_LOC/ota/ota_client.h</locationURI>
+		</link>
+		<link>
+			<name>Application/source/bh1750.c</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/bh1750.c</locationURI>
+		</link>
+		<link>
+			<name>Application/source/bh1750.h</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/bh1750.h</locationURI>
+		</link>
+		<link>
+			<name>Application/source/bme280i2c.c</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/bme280i2c.c</locationURI>
+		</link>
+		<link>
+			<name>Application/source/bme280i2c.h</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/bme280i2c.h</locationURI>
+		</link>
+		<link>
+			<name>Application/source/epd1in54v2.c</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/epd1in54v2.c</locationURI>
+		</link>
+		<link>
+			<name>Application/source/epd1in54v2.h</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/epd1in54v2.h</locationURI>
+		</link>
+		<link>
+			<name>Application/source/epdpaint.c</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/epdpaint.c</locationURI>
+		</link>
+		<link>
+			<name>Application/source/epdpaint.h</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/epdpaint.h</locationURI>
+		</link>
+		<link>
+			<name>Application/source/font12.c</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/font12.c</locationURI>
+		</link>
+		<link>
+			<name>Application/source/font16.c</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/font16.c</locationURI>
+		</link>
+		<link>
+			<name>Application/source/font20.c</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/font20.c</locationURI>
+		</link>
+		<link>
+			<name>Application/source/font24.c</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/font24.c</locationURI>
+		</link>
+		<link>
+			<name>Application/source/font32.c</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/font32.c</locationURI>
+		</link>
+		<link>
+			<name>Application/source/font48.c</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/font48.c</locationURI>
+		</link>
+		<link>
+			<name>Application/source/font8.c</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/font8.c</locationURI>
+		</link>
+		<link>
+			<name>Application/source/fonts.h</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/fonts.h</locationURI>
+		</link>
+		<link>
+			<name>Application/source/zcl_sample_app_def.h</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/zcl_sample_app_def.h</locationURI>
+		</link>
+		<link>
+			<name>Application/source/zcl_samplesw.c</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/zcl_samplesw.c</locationURI>
+		</link>
+		<link>
+			<name>Application/source/zcl_samplesw.h</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/zcl_samplesw.h</locationURI>
+		</link>
+		<link>
+			<name>Application/source/zcl_samplesw_data.c</name>
+			<type>1</type>
+			<locationURI>PROJ_LOC/source/zcl_samplesw_data.c</locationURI>
 		</link>
 		<link>
 			<name>Application/ui/cui.c</name>

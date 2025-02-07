@@ -98,9 +98,14 @@ extern "C"
 #define SAMPLEAPP_PROV_DISCONNECT_EVT     0x0004
 #define SAMPLEAPP_GET_NWK_INFO_EVT        0x0008
 #define SAMPLEAPP_SYNC_ATTR_EVT           0x0010
+
 #if defined (BH1750) || defined (BME280)
-#define SAMPLEAPP_SENSOR_START_EVT        0x0020
+#define SAMPLEAPP_SENSOR_START_EVT          0x0020
+#ifdef CUSTOM_TASK
+#define SAMPLEAPP_SENSOR_START_EVT_1      0x0001
+#endif //CUSTOM_TASK
 #endif
+
 #ifdef BH1750
 #define SAMPLEAPP_BH1750_SEND_EVT         0x0040
 #endif

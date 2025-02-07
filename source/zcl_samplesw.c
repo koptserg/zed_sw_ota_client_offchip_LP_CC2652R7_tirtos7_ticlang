@@ -242,10 +242,16 @@ uint8_t zclSampleSw_OnOffSwitchActions;
 static Semaphore_Handle appSemHandle;
 static Semaphore_Struct appSem;
 
+static Semaphore_Handle appSemHandle1;
+static Semaphore_Struct appSem1;
+
 /* App service ID used for messaging with stack service task */
 static uint8_t  appServiceTaskId;
+static uint8_t  appServiceTaskId_1;
+
 /* App service task events, set by the stack service task when sending a message */
 static uint32_t appServiceTaskEvents;
+static uint32_t appServiceTaskEvents_1;
 
 static endPointDesc_t  zclSampleSwEpDesc = {0};
 static endPointDesc_t  zclSampleSwSensorEpDesc = {0};
@@ -315,6 +321,12 @@ I2C_Handle i2cHandle;
  */
 static void zclSampleSw_initialization(void);
 static void zclSampleSw_process_loop(void);
+
+#ifdef CUSTOM_TASK
+static void zclSampleSw_initialization_1(void);
+static void zclSampleSw_process_loop_1(void);
+#endif //CUSTOM_TASK
+
 static void zclSampleSw_initParameters(void);
 static void zclSampleSw_processZStackMsgs(zstackmsg_genericReq_t *pMsg);
 static void SetupZStackCallbacks(void);
@@ -549,12 +561,25 @@ void sampleApp_task(NVINTF_nvFuncts_t *pfnNV)
 
   // Initialize application
   zclSampleSw_initialization();
-//  epd1in54v2_initialization(appSemHandle, appServiceTaskId);
 
   // No return from task process
   zclSampleSw_process_loop();
 }
 
+#ifdef CUSTOM_TASK
+void sampleApp_task_1(NVINTF_nvFuncts_t *pfnNV)
+{
+  // Save and register the function pointers to the NV drivers
+  pfnZdlNV = pfnNV;
+  zclport_registerNV(pfnZdlNV, ZCL_PORT_SCENE_TABLE_NV_ID);
+
+  // Initialize application
+  zclSampleSw_initialization_1();
+
+  // No return from task process
+  zclSampleSw_process_loop_1();
+}
+#endif //CUSTOM_TASK
 /*******************************************************************************
  * @fn          zclSampleSw_initialization
  *
@@ -614,6 +639,25 @@ static void zclSampleSw_initialization(void)
 #endif
 }
 
+#ifdef CUSTOM_TASK
+static void zclSampleSw_initialization_1(void)
+{
+    /* Initialize user clocks */
+//    zclSampleSw_initializeClocks();
+
+    /* create semaphores for messages / events
+     */
+    Semaphore_Params semParam;
+    Semaphore_Params_init(&semParam);
+    semParam.mode = ti_sysbios_knl_Semaphore_Mode_COUNTING;
+    Semaphore_construct(&appSem1, 0, &semParam);
+    appSemHandle1 = Semaphore_handle(&appSem1);
+
+    appServiceTaskId_1 = OsalPort_registerTask(Task_self(), appSemHandle1, &appServiceTaskEvents_1);
+
+    OsalPortTimers_startReloadTimer(appServiceTaskId_1, SAMPLEAPP_SENSOR_START_EVT_1, 3000);
+}
+#endif //CUSTOM_TASK
 /*********************************************************************
  * @fn          zclSampleSw_Init
  *
@@ -1233,7 +1277,9 @@ static void zclSampleSw_process_loop(void)
 #if defined (BH1750) || defined (BME280)
             if (appServiceTaskEvents & SAMPLEAPP_SENSOR_START_EVT)
             {
+#ifndef CUSTOM_TASK
                 zclSampleSw_processBatteryMeasuremts();
+#endif
                 zclSampleSw_I2cInit();
 #ifdef BME280
                 bme280_takeForcedMeasurement();
@@ -1357,6 +1403,25 @@ static void zclSampleSw_process_loop(void)
         }
     }
 }
+
+#ifdef CUSTOM_TASK
+static void zclSampleSw_process_loop_1(void)
+{
+    /* Forever loop */
+    for(;;)
+    {
+            /* Wait for response message */
+        if(Semaphore_pend(appSemHandle1, BIOS_WAIT_FOREVER )) {
+            if (appServiceTaskEvents_1 & SAMPLEAPP_SENSOR_START_EVT_1)
+            {
+                zclSampleSw_processBatteryMeasuremts();
+                appServiceTaskEvents_1 &= ~SAMPLEAPP_SENSOR_START_EVT_1;
+            }
+        }
+    }
+
+}
+#endif //CUSTOM_TASK
 
 #if defined(DMM_ZCSWITCH) && defined(NWK_TOPOLOGY_DISCOVERY)
 static void zclSampleSw_deviceDiscoveryCb(NwkDiscovery_device_t* newDevice)

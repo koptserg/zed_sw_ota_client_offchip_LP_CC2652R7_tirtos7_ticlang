@@ -122,7 +122,8 @@
 #define EXTADDR_OFFSET 0x2F0
 
 
-#define APP_TASK_STACK_SIZE 3000
+#define APP_TASK_STACK_SIZE     3000
+#define APP_TASK_STACK_SIZE_1   512
 
 #define SET_RFC_MODE(mode) HWREG( PRCM_BASE + PRCM_O_RFCMODESEL ) = (mode)
 
@@ -148,7 +149,11 @@ extern ApiMac_sAddrExt_t ApiMac_extAddr;
 #ifndef ZNP_NPI
 Task_Struct myTask;
 Char myTaskStack[APP_TASK_STACK_SIZE];
-#endif
+#ifdef CUSTOM_TASK
+Task_Struct myTask1;
+Char myTaskStack1[APP_TASK_STACK_SIZE_1];
+#endif //CUSTOM_TASK
+#endif //ZNP_NPI
 
 #ifndef TIMAC_ROM_IMAGE_BUILD
 /* Crypto driver function table */
@@ -175,6 +180,16 @@ zstack_Config_t zstack_user0Cfg =
     MAC_USER_CFG
 };
 
+#ifdef CUSTOM_TASK
+zstack_Config_t zstack_user1Cfg =
+{
+    {0, 0, 0, 0, 0, 0, 0, 0}, // Extended Address
+    {0, 0, 0, 0, 0, 0, 0, 0}, // NV function pointers
+    0,                        // Application thread ID
+    0,                        // stack image init fail flag
+    MAC_USER_CFG
+};
+#endif
 /* Stack TIRTOS Task semaphore */
 Semaphore_Struct npiInitializationMutex;
 Semaphore_Handle npiInitializationMutexHandle;
@@ -240,14 +255,34 @@ Void taskFxn(UArg a0, UArg a1)
        the stack */
     Zstackapi_init(stackServiceTaskId);
 #endif
-
     /* Kick off application */
     extern void sampleApp_task(NVINTF_nvFuncts_t *pfnNV);
     sampleApp_task(&zstack_user0Cfg.nvFps);
-
 }
 
+#ifdef CUSTOM_TASK
+Void taskFxn1(UArg a0, UArg a1)
+{
+#if defined(USE_CACHE_RAM)
+    /* Retain the Cache RAM */
+    Power_setConstraint(PowerCC26XX_SB_VIMS_CACHE_RETAIN);
 #endif
+
+#ifdef ZSTACK_GPD
+
+#else
+    /* get the service taskId of the Stack */
+    stackServiceTaskId = stackTask_getStackServiceId();
+    /* configure the message API the application will use to communicate with
+       the stack */
+    Zstackapi_init(stackServiceTaskId);
+#endif
+    /* Kick off application 1*/
+    extern void sampleApp_task_1(NVINTF_nvFuncts_t *pfnNV);
+    sampleApp_task_1(&zstack_user0Cfg.nvFps);
+}
+#endif //CUSTOM_TASK
+#endif //ZNP_NPI
 
 /*!
  * @brief       TIRTOS HWI Handler.  The name of this function is set to
@@ -377,17 +412,24 @@ int main()
 
     CUI_paramsInit(&cuiParams);
     CUI_init(&cuiParams);
-#endif
+#endif //CUI_DISABLE
     Task_Params taskParams;
-
     /* Configure app task. */
     Task_Params_init(&taskParams);
     taskParams.stack = myTaskStack;
     taskParams.stackSize = APP_TASK_STACK_SIZE;
     taskParams.priority = 2;
     Task_construct(&myTask, taskFxn, &taskParams, NULL);
-
-#endif
+#ifdef CUSTOM_TASK
+    Task_Params taskParams1;
+    /* Configure app task. */
+    Task_Params_init(&taskParams1);
+    taskParams1.stack = myTaskStack1;
+    taskParams1.stackSize = APP_TASK_STACK_SIZE_1;
+    taskParams1.priority = 2;
+    Task_construct(&myTask1, taskFxn1, &taskParams1, NULL);
+#endif //CUSTOM_TASK
+#endif //ZNP_NPI
 
 #ifdef DEBUG_SW_TRACE
     IOCPortConfigureSet(IOID_8, IOC_PORT_RFC_TRC, IOC_STD_OUTPUT
@@ -395,6 +437,5 @@ int main()
 #endif /* DEBUG_SW_TRACE */
 
     BIOS_start(); /* enable interrupts and start SYS/BIOS */
-
     return 0; // never executed
 }
