@@ -148,14 +148,7 @@
 //#include <Application/source/bme280i2c.h>
 #include <bme280i2c.h>
 #endif
-#ifdef EPD1IN54V2
-//#include <Application/source/epd1in54v2.h>
-//#include <Application/source/imagedata.h>
-//#include <Application/source/epdpaint.h>
-#include <epd1in54v2.h>
-#include <imagedata.h>
-#include <epdpaint.h>
-#endif
+
 #include "ti_zstack_config.h"
 #if !defined (DISABLE_GREENPOWER_BASIC_PROXY) && (ZG_BUILD_RTR_TYPE)
 #include "gp_common.h"
@@ -275,6 +268,7 @@ afAddrType_t zclSampleSw_DstAddr;
 #if !defined(CUI_DISABLE)
 CONST char zclSampleSw_appStr[] = APP_TITLE_STR;
 CUI_clientHandle_t gCuiHandle;
+CUI_clientHandle_t gCuiHandle_1;
 static uint32_t gSampleSwInfoLine;
 #ifdef BH1750
 static uint32_t gSampleSwInfoLine2;
@@ -282,10 +276,7 @@ static uint32_t gSampleSwInfoLine2;
 #ifdef BME280
 static uint32_t gSampleSwInfoLine3;
 #endif
-#ifdef EPD1IN54V2
-uint32_t DisplayFramePartial = 0;
 static uint32_t gSampleSwInfoLine4;
-#endif
 static uint32_t gSampleSwInfoLine5;
 #endif
 
@@ -321,11 +312,6 @@ I2C_Handle i2cHandle;
  */
 static void zclSampleSw_initialization(void);
 static void zclSampleSw_process_loop(void);
-
-#ifdef CUSTOM_TASK
-static void zclSampleSw_initialization_1(void);
-static void zclSampleSw_process_loop_1(void);
-#endif //CUSTOM_TASK
 
 static void zclSampleSw_initParameters(void);
 static void zclSampleSw_processZStackMsgs(zstackmsg_genericReq_t *pMsg);
@@ -378,25 +364,23 @@ static void zclSampleSw_I2cInit(void);
 static void zclSampleSw_I2cClose(void);
 #endif
 
-#ifdef EPD1IN54V2
 static void zcl_DelayUs(uint16_t microSecs);
 static void zcl_DelayMs(uint16_t delaytime);
-//static void EpdRefresh(void);
-static void EpdtestRefresh(void);
-static void zclSampleSw_SendTime_CmdLocalTime(void);
-#endif
 
+static void zclSampleSw_SendTime_CmdLocalTime(void);
 static void zclApp_SetTimeDate(void);
 
 static void zclSampleSw_processBatteryMeasuremts(void);
 static uint8_t getBatteryRemainingPercentageZCLCR2032(uint16_t volt16);
 static void zclSampleSw_BatteryReport(void);
 #ifdef BME280
+static void zclSampleSw_processBME280Measuremts(void);
 static void zclSampleSw_BME280HumidityReport(void);
 static void zclSampleSw_BME280PressureReport(void);
 static void zclSampleSw_BME280TemperatureReport(void);
 #endif
 #ifdef BH1750
+static void zclSampleSw_processBH1750Measuremts(void);
 static void zclSampleSw_BH1750IlluminanceReport(void);
 #endif
 #if defined (BDB_TL_TARGET) || defined (BDB_TL_INITIATOR)
@@ -566,20 +550,6 @@ void sampleApp_task(NVINTF_nvFuncts_t *pfnNV)
   zclSampleSw_process_loop();
 }
 
-#ifdef CUSTOM_TASK
-void sampleApp_task_1(NVINTF_nvFuncts_t *pfnNV)
-{
-  // Save and register the function pointers to the NV drivers
-  pfnZdlNV = pfnNV;
-  zclport_registerNV(pfnZdlNV, ZCL_PORT_SCENE_TABLE_NV_ID);
-
-  // Initialize application
-  zclSampleSw_initialization_1();
-
-  // No return from task process
-  zclSampleSw_process_loop_1();
-}
-#endif //CUSTOM_TASK
 /*******************************************************************************
  * @fn          zclSampleSw_initialization
  *
@@ -631,33 +601,29 @@ static void zclSampleSw_initialization(void)
     // register the app callbacks
     DMMPolicy_registerAppCbs(dmmPolicyAppCBs, DMMPolicy_StackRole_Zigbee);
 #endif
+
 #if defined (BH1750) || defined (BME280)
     OsalPortTimers_startReloadTimer(appServiceTaskId, SAMPLEAPP_SENSOR_START_EVT, 3000);
 #endif
-#ifdef EPD1IN54V2
-    OsalPortTimers_startReloadTimer(appServiceTaskId,  SAMPLEAPP_APP_EPD_DELAY_EVT, 60000);
+
+#if defined (BH1750) || defined (BME280)
+  // One-time init of I2C driver
+  I2C_init();
+  zclSampleSw_I2cInit();
 #endif
+#ifdef BH1750
+  bh1750_detect = bh1750_init(BH1750_mode);
+#endif
+#ifdef BME280
+  BME280Init();
+#endif
+#if defined (BH1750) || defined (BME280)
+  zclSampleSw_I2cClose();
+#endif
+
+  zclApp_SetTimeDate();
 }
 
-#ifdef CUSTOM_TASK
-static void zclSampleSw_initialization_1(void)
-{
-    /* Initialize user clocks */
-//    zclSampleSw_initializeClocks();
-
-    /* create semaphores for messages / events
-     */
-    Semaphore_Params semParam;
-    Semaphore_Params_init(&semParam);
-    semParam.mode = ti_sysbios_knl_Semaphore_Mode_COUNTING;
-    Semaphore_construct(&appSem1, 0, &semParam);
-    appSemHandle1 = Semaphore_handle(&appSem1);
-
-    appServiceTaskId_1 = OsalPort_registerTask(Task_self(), appSemHandle1, &appServiceTaskEvents_1);
-
-    OsalPortTimers_startReloadTimer(appServiceTaskId_1, SAMPLEAPP_SENSOR_START_EVT_1, 3000);
-}
-#endif //CUSTOM_TASK
 /*********************************************************************
  * @fn          zclSampleSw_Init
  *
@@ -819,45 +785,8 @@ static void zclSampleSw_Init( void )
 
   //Initialize the sampleLight UI status line
   zclSampleSw_InitializeStatusLine(gCuiHandle);
+
 #endif // CUI_DISABLE
-
-#if defined (BH1750) || defined (BME280)
-/*
-CONFIG_I2C_0
-I2C Peripheral - Any(I2C0)
-CONFIG_GPIO_I2C_0_SDA - DIO5/10 (Header)
-CONFIG_GPIO_I2C_0_SCL - DIO4/9 (Header)
-*/
-  // One-time init of I2C driver
-  I2C_init();
-  zclSampleSw_I2cInit();
-#endif
-#ifdef BH1750
-  bh1750_detect = bh1750_init(BH1750_mode);
-#endif
-#ifdef BME280
-  BME280Init();
-#endif
-#if defined (BH1750) || defined (BME280)
-  zclSampleSw_I2cClose();
-#endif
-
-#ifdef EPD1IN54V2
-  zclApp_SetTimeDate();
-  SPI_init();
-  EpdSpiInit();
-  uint8_t zclApp_color = 0xFF;
-
-  EpdInitFull();
-  EpdClearFrameMemory(zclApp_color);
-  EpdDisplayFrame();
-  EpdClearFrameMemory(zclApp_color);
-  EpdDisplayFrame();
-
-  EpdInitPartial();
-  EpdtestRefresh();
-//  EpdSpiClose();
-#endif
 
 #ifdef CUI_DISABLE
   //Request the LED for App
@@ -1117,9 +1046,6 @@ static void zclSampleSw_process_loop(void)
 #if defined (OTA_CLIENT_INTEGRATED)
             otaClient_event_loop();
 #endif
-#ifdef EPD1IN54V2
-//            epd1in54v2_process_loop();
-#endif
 #ifndef CUI_DISABLE
             zclsampleApp_ui_event_loop();
 #endif
@@ -1252,34 +1178,15 @@ static void zclSampleSw_process_loop(void)
               appServiceTaskEvents &= ~SAMPLEAPP_END_DEVICE_REJOIN_EVT;
             }
 #endif
-#ifdef EPD1IN54V2
 
-            if ( appServiceTaskEvents & SAMPLEAPP_APP_EPD_PARTIAL_EVT )
-            {
-                  if (GPIO_read(CONFIG_GPIO_BUTTON_BUSY_EPD_INPUT) != 1) {
-                      OsalPortTimers_stopTimer(appServiceTaskId,  SAMPLEAPP_APP_EPD_PARTIAL_EVT);
-                      EpdSleep();
-                      EpdSpiClose();
-                  } else {
-                      OsalPortTimers_startTimer(appServiceTaskId,  SAMPLEAPP_APP_EPD_PARTIAL_EVT, 100);
-                  }
-
-              appServiceTaskEvents &= ~SAMPLEAPP_APP_EPD_PARTIAL_EVT;
-            }
-            if ( appServiceTaskEvents & SAMPLEAPP_APP_EPD_DELAY_EVT )
-            {
-                  EpdSpiInit();
-                  EpdtestRefresh();
-              appServiceTaskEvents &= ~SAMPLEAPP_APP_EPD_DELAY_EVT;
-            }
-
-#endif
-#if defined (BH1750) || defined (BME280)
             if (appServiceTaskEvents & SAMPLEAPP_SENSOR_START_EVT)
             {
-#ifndef CUSTOM_TASK
                 zclSampleSw_processBatteryMeasuremts();
+#ifndef CUI_DISABLE
+//              zclSampleSw_UpdateStatusLine();
 #endif
+
+#if defined (BH1750) || defined (BME280)
                 zclSampleSw_I2cInit();
 #ifdef BME280
                 bme280_takeForcedMeasurement();
@@ -1298,65 +1205,28 @@ static void zclSampleSw_process_loop(void)
               }
 #endif
               zclSampleSw_I2cClose();
+#endif
               appServiceTaskEvents &= ~SAMPLEAPP_SENSOR_START_EVT;
             }
-#endif
+
 #ifdef BH1750
             if (appServiceTaskEvents & SAMPLEAPP_BH1750_SEND_EVT)
             {
-              zclSampleSw_I2cInit();
-              zclSampleSw_IlluminanceMeasurment_MeasuredValue = (uint16)(bh1750_Read());
-              bh1750_PowerDown();
-#ifdef BDB_REPORTING
-          zstack_bdbRepChangedAttrValueReq_t Req;
-          Req.attrID = ATTRID_ILLUMINANCE_MEASUREMENT_MEASURED_VALUE;
-          Req.cluster = ZCL_CLUSTER_ID_MS_ILLUMINANCE_MEASUREMENT;
-          Req.endpoint = SAMPLESW_SENSORENDPOINT;
-          Zstackapi_bdbRepChangedAttrValueReq(appServiceTaskId,&Req);
-#endif
-#ifndef CUI_DISABLE
-              zclSampleSw_UpdateStatusLine();
-#endif
-              zclSampleSw_I2cClose();
+              zclSampleSw_processBH1750Measuremts();
+
               appServiceTaskEvents &= ~SAMPLEAPP_BH1750_SEND_EVT;
             }
 #endif
+
 #ifdef BME280
             if (appServiceTaskEvents & SAMPLEAPP_BME280_SEND_EVT)
             {
-                zclSampleSw_I2cInit();
-                if (bme280_checkRegisterStatus()) {
-                  zclSampleSw_Temperature_Sensor_MeasuredValue = (int16)(bme280_readTemperature() *100);
-                  zclSampleSw_HumiditySensor_MeasuredValue = (uint16)(bme280_readHumidity() * 100);
-                  zclSampleSw_PressureSensor_MeasuredValue = (int16)bme280_readPressure();
-//                  zclSampleSw_PressureSensor_ScaledValue = (int16) (pow(10.0, (double) zclSampleSw_PressureSensor_Scale) * (double) bme280_readPressure()* 100);
-#ifdef BDB_REPORTING
-          zstack_bdbRepChangedAttrValueReq_t Req1 = {0};
-          Req1.attrID = ATTRID_TEMPERATURE_MEASUREMENT_MEASURED_VALUE;
-          Req1.cluster = ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT;
-          Req1.endpoint = SAMPLESW_SENSORENDPOINT;
-          Zstackapi_bdbRepChangedAttrValueReq(appServiceTaskId,&Req1);
+              zclSampleSw_processBME280Measuremts();
 
-          zstack_bdbRepChangedAttrValueReq_t Req2 = {0};
-          Req2.attrID = ATTRID_PRESSURE_MEASUREMENT_MEASURED_VALUE;
-          Req2.cluster = ZCL_CLUSTER_ID_MS_PRESSURE_MEASUREMENT;
-          Req2.endpoint = SAMPLESW_SENSORENDPOINT;
-          Zstackapi_bdbRepChangedAttrValueReq(appServiceTaskId,&Req2);
-
-          zstack_bdbRepChangedAttrValueReq_t Req3 = {0};
-          Req3.attrID = ATTRID_RELATIVITY_HUMIDITY_MEASURED_VALUE;
-          Req3.cluster = ZCL_CLUSTER_ID_MS_RELATIVE_HUMIDITY;
-          Req3.endpoint = SAMPLESW_SENSORENDPOINT;
-          Zstackapi_bdbRepChangedAttrValueReq(appServiceTaskId,&Req3);
-#endif
-#ifndef CUI_DISABLE
-                  zclSampleSw_UpdateStatusLine();
-#endif
-                }
-              zclSampleSw_I2cClose();
               appServiceTaskEvents &= ~SAMPLEAPP_BME280_SEND_EVT;
             }
 #endif
+
 #ifdef CUI_DISABLE
   if (appServiceTaskEvents & SAMPLEAPP_KEY_EVT)
   {
@@ -1403,25 +1273,6 @@ static void zclSampleSw_process_loop(void)
         }
     }
 }
-
-#ifdef CUSTOM_TASK
-static void zclSampleSw_process_loop_1(void)
-{
-    /* Forever loop */
-    for(;;)
-    {
-            /* Wait for response message */
-        if(Semaphore_pend(appSemHandle1, BIOS_WAIT_FOREVER )) {
-            if (appServiceTaskEvents_1 & SAMPLEAPP_SENSOR_START_EVT_1)
-            {
-                zclSampleSw_processBatteryMeasuremts();
-                appServiceTaskEvents_1 &= ~SAMPLEAPP_SENSOR_START_EVT_1;
-            }
-        }
-    }
-
-}
-#endif //CUSTOM_TASK
 
 #if defined(DMM_ZCSWITCH) && defined(NWK_TOPOLOGY_DISCOVERY)
 static void zclSampleSw_deviceDiscoveryCb(NwkDiscovery_device_t* newDevice)
@@ -2506,7 +2357,6 @@ void zclSampleSw_actionToggleLight(const int32_t _itemEntry)
 
 }
 
-#ifdef EPD1IN54V2
 static void zclSampleSw_SendTime_CmdLocalTime(void)
 {
     zstack_getZCLFrameCounterRsp_t Rsp;
@@ -2526,9 +2376,8 @@ static void zclSampleSw_SendTime_CmdLocalTime(void)
     ZCL_CLUSTER_ID_GENERAL_TIME,
     cmd, ZCL_FRAME_CLIENT_SERVER_DIR,
     TRUE, Rsp.zclFrameCounter );
-
 }
-#endif
+
 
 void zclSampleSw_UiActionSwDiscoverable(const int32_t _itemEntry)
 {
@@ -2590,9 +2439,7 @@ static void zclSampleSw_processKey(uint8_t key, Button_EventMask buttonEvents)
         }
         if(key ==  CONFIG_BTN_LEFT)
         {
-#ifdef EPD1IN54V2
             zclSampleSw_SendTime_CmdLocalTime();
-#endif
 #ifdef BH1750
           zclSampleSw_BH1750IlluminanceReport();
 #endif
@@ -2633,9 +2480,7 @@ static void zclSampleSw_processKey(Button_Handle key, Button_EventMask buttonEve
         if(key == gLeftButtonHandle)
         {
             BLINK_ONCE(gGreenLedHandle);
-#ifdef EPD1IN54V2
             zclSampleSw_SendTime_CmdLocalTime();
-#endif
 #ifdef BH1750
           zclSampleSw_BH1750IlluminanceReport();
 #endif
@@ -2816,9 +2661,7 @@ static void zclSampleSw_InitializeStatusLine(CUI_clientHandle_t cuiHandle)
 #ifdef BH1750
     CUI_statusLineResourceRequest(cuiHandle, " APP BME280"CUI_DEBUG_MSG_START"3"CUI_DEBUG_MSG_END, false, &gSampleSwInfoLine3);
 #endif
-#ifdef EPD1IN54V2
     CUI_statusLineResourceRequest(cuiHandle, " APP EPD154"CUI_DEBUG_MSG_START"4"CUI_DEBUG_MSG_END, false, &gSampleSwInfoLine4);
-#endif
     CUI_statusLineResourceRequest(cuiHandle, " APP    BAT"CUI_DEBUG_MSG_START"5"CUI_DEBUG_MSG_END, false, &gSampleSwInfoLine5);
     zclSampleSw_UpdateStatusLine();
 }
@@ -2854,7 +2697,7 @@ static void zclSampleSw_UpdateStatusLine(void)
                          (uint16_t)(zclSampleSw_HumiditySensor_MeasuredValue/100), zclSampleSw_HumiditySensor_MeasuredValue - (uint16_t)(zclSampleSw_HumiditySensor_MeasuredValue/100)*100,
                          zclSampleSw_PressureSensor_MeasuredValue);
 #endif
-#ifdef EPD1IN54V2
+
     UTCTimeStruct time;
     UTC_convertUTCTime(&time, UTC_getClock());
     uint8 day_week = (uint16)(float)(zclSampleSw_GenTime_TimeUTC/86400) % 7;
@@ -2877,7 +2720,7 @@ static void zclSampleSw_UpdateStatusLine(void)
     char lineFormat4[MAX_STATUS_LINE_VALUE_LEN] = {'\0'};
     strcpy(lineFormat4, "["CUI_COLOR_YELLOW"Local time"CUI_COLOR_RESET"] %d/%d/%d %s %d:%d:%d %d");
     CUI_statusLinePrintf(gCuiHandle, gSampleSwInfoLine4, lineFormat4, time.day+1, time.month+1, time.year, day_string,time.hour, time.minutes, time.seconds, zclSampleSw_GenTime_TimeUTC);
-#endif
+
     char lineFormat5[MAX_STATUS_LINE_VALUE_LEN] = {'\0'};
     strcpy(lineFormat5, "["CUI_COLOR_YELLOW"Voltage"CUI_COLOR_RESET"] %d uV ["CUI_COLOR_YELLOW"Percentage"CUI_COLOR_RESET"] %d %%");
     CUI_statusLinePrintf(gCuiHandle, gSampleSwInfoLine5, lineFormat5, zclSampleSw_batteryVoltageRaw, zclSampleSw_PercentageRemainig/2);
@@ -2917,246 +2760,6 @@ static void zcl_DelayMs(uint16_t delaytime) {
       zcl_DelayUs(1000);
   }
 }
-
-#ifdef EPD1IN54V2
-/*
-static void EpdRefresh(void){
-      OsalPortTimers_startTimer(appServiceTaskId,  SAMPLEAPP_APP_EPD_DELAY_EVT, 1000);
-}
-*/
-
-static void EpdtestRefresh(void)
-{
-  EpdReset(); //disable sleep EPD
-  PaintSetInvert(1);
-
-    //status network
-    // landscape
-    if ( bdbAttributes.bdbNodeIsOnANetwork ){
-      EpdSetFrameMemoryImageXY(IMAGE_ONNETWORK, 184, 0, 16, 16, 1);
-    } else {
-      EpdSetFrameMemoryImageXY(IMAGE_OFFNETWORK, 184, 0, 16, 16, 1);
-    }
-
-    //percentage
-    char perc_string[] = {' ', ' ', ' ', ' ', '\0'};
-    if (zclSampleSw_PercentageRemainig != 0xFF) {
-      perc_string[0] = zclSampleSw_PercentageRemainig/2 / 100 % 10 + '0';
-      perc_string[1] = zclSampleSw_PercentageRemainig/2 / 10 % 10 + '0';
-      perc_string[2] = zclSampleSw_PercentageRemainig/2 % 10 + '0';
-      perc_string[3] = '%';
-    }
-    PaintSetWidth(16);
-    PaintSetHeight(48);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, perc_string, &Font16, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 184, 144, PaintGetWidth(), PaintGetHeight());
-    if (zclSampleSw_PercentageRemainig != 0xFF) {
-      if(zclSampleSw_PercentageRemainig/2 > 75){
-        EpdSetFrameMemoryImageXY(IMAGE_BATTERY_100, 184, 116, 16, 25, 1);
-      } else if (zclSampleSw_PercentageRemainig/2 <= 75 && zclSampleSw_PercentageRemainig/2 > 50) {
-        EpdSetFrameMemoryImageXY(IMAGE_BATTERY_75, 184, 116, 16, 25, 1);
-      } else if (zclSampleSw_PercentageRemainig/2 <= 50 && zclSampleSw_PercentageRemainig/2 > 25) {
-        EpdSetFrameMemoryImageXY(IMAGE_BATTERY_50, 184, 116, 16, 25, 1);
-      } else if (zclSampleSw_PercentageRemainig/2 <= 25 && zclSampleSw_PercentageRemainig/2 > 6) {
-        EpdSetFrameMemoryImageXY(IMAGE_BATTERY_25, 184, 116, 16, 25, 1);
-      } else if (zclSampleSw_PercentageRemainig/2 <= 6 && zclSampleSw_PercentageRemainig/2 > 0) {
-        EpdSetFrameMemoryImageXY(IMAGE_BATTERY_0, 184, 116, 16, 25, 1);
-      }
-    }
-
-  // clock init Firmware build date 20/08/2021 13:47
-  // Update RTC and get new clock values
-    UTCTimeStruct time;
-    UTC_convertUTCTime(&time, UTC_getClock());
-
-    char time_string[] = {'0', '0', ':', '0', '0', ':', '0', '0','\0'};
-    time_string[0] = time.hour / 10 % 10 + '0';
-    time_string[1] = time.hour % 10 + '0';
-    time_string[3] = time.minutes / 10 % 10 + '0';
-    time_string[4] = time.minutes % 10 + '0';
-    time_string[6] = time.seconds / 10 % 10 + '0';
-    time_string[7] = time.seconds % 10 + '0';
-
-    // covert UTCTimeStruct date and month to display
-    time.day = time.day + 1;
-    time.month = time.month + 1;
-    char date_string[] = {'0', '0', '/', '0', '0', '/', '0', '0', '\0'};
-    date_string[0] = time.day /10 % 10  + '0';
-    date_string[1] = time.day % 10 + '0';
-    date_string[3] = time.month / 10 % 10 + '0';
-    date_string[4] = time.month % 10 + '0';
-    date_string[6] = time.year / 10 % 10 + '0';
-    date_string[7] = time.year % 10 + '0';
-
-    // landscape
-      PaintSetWidth(48);
-      PaintSetHeight(200);
-      PaintSetRotate(ROTATE_90);
-      PaintClear(UNCOLORED);
-      PaintDrawStringAt(0, 4, time_string, &Font48, COLORED);
-      EpdSetFrameMemoryXY(PaintGetImage(), 136, 4, PaintGetWidth(), PaintGetHeight());
-
-    //landscape
-      PaintSetWidth(16);
-      PaintSetHeight(100);
-      PaintSetRotate(ROTATE_90);
-      PaintClear(UNCOLORED);
-      PaintDrawStringAt(10, 0, date_string, &Font16, COLORED);
-      EpdSetFrameMemoryXY(PaintGetImage(), 120, 100, PaintGetWidth(), PaintGetHeight());
-
-//    uint8 day_week = (uint16)floor((float)(zclSampleSw_GenTime_TimeUTC/86400)) % 7;
-    uint8 day_week = (uint16)(float)(zclSampleSw_GenTime_TimeUTC/86400) % 7;
-    char* day_string = "";
-    if (day_week == 5) {
-      day_string = "Thursday";
-    } else if (day_week == 6) {
-      day_string = " Friday ";
-    } else if (day_week == 0) {
-      day_string = "Saturday";
-    } else if (day_week == 1) {
-      day_string = " Sunday";
-    } else if (day_week == 2) {
-      day_string = " Monday";
-    } else if (day_week == 3) {
-      day_string = "Tuesday";
-    } else if (day_week == 4) {
-      day_string = "Wednesday";
-    }
-
-    //landscape
-      PaintSetWidth(16);
-      PaintSetHeight(100);
-      PaintSetRotate(ROTATE_90);
-      PaintClear(UNCOLORED);
-      PaintDrawStringAt(0, 0, day_string, &Font16, COLORED);
-      EpdSetFrameMemoryXY(PaintGetImage(), 120, 4, PaintGetWidth(), PaintGetHeight());
-
-      //OTA status
-      char ota_string[] = {'O','T','A', ':', ' ', ' ', ' ', ' ', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '\0'};
-      uint32_t progress = (uint32_t)((100 * zclSampleSw_FileOffset) / zclOTA_DownloadedImageSize);
-      ota_string[4] = progress / 100 % 10 + '0';
-      ota_string[5] = progress / 10 % 10 + '0';
-      ota_string[6] = progress % 10 + '0';
-
-      if (progress >= 10) { ota_string[8] = '#'; }
-      if (progress >= 20) { ota_string[9] = '#'; }
-      if (progress >= 30) { ota_string[10] = '#'; }
-      if (progress >= 40) { ota_string[11] = '#'; }
-      if (progress >= 50) { ota_string[12] = '#'; }
-      if (progress >= 60) { ota_string[13] = '#'; }
-      if (progress >= 70) { ota_string[14] = '#'; }
-      if (progress >= 80) { ota_string[15] = '#'; }
-      if (progress >= 90) { ota_string[16] = '#'; }
-      if (progress == 100) { ota_string[17] = '#'; }
-
-      if (zclSampleSw_ImageUpgradeStatus == OTA_STATUS_IN_PROGRESS) {
-      //landscape
-        PaintSetWidth(16);
-        PaintSetHeight(200);
-        PaintSetRotate(ROTATE_90);
-        PaintClear(UNCOLORED);
-        PaintDrawStringAt(0, 0, ota_string, &Font16, COLORED);
-        EpdSetFrameMemoryXY(PaintGetImage(), 104, 4, PaintGetWidth(), PaintGetHeight());
-      }
-
-  //Illuminance
-  char illum_string[] = {'0','0', '0', '0', '0', '\0'};
-#ifdef BH1750
-  illum_string[0] = zclSampleSw_IlluminanceMeasurment_MeasuredValue / 10000 % 10 + '0';
-  illum_string[1] = zclSampleSw_IlluminanceMeasurment_MeasuredValue / 1000 % 10 + '0';
-  illum_string[2] = zclSampleSw_IlluminanceMeasurment_MeasuredValue / 100 % 10 + '0';
-  illum_string[3] = zclSampleSw_IlluminanceMeasurment_MeasuredValue / 10 % 10 + '0';
-  illum_string[4] = zclSampleSw_IlluminanceMeasurment_MeasuredValue % 10 + '0';
-#endif
-  //landscape
-    PaintSetWidth(32);
-    PaintSetHeight(80);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, illum_string, &Font32, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 64, 120, PaintGetWidth(), PaintGetHeight());
-    PaintSetWidth(16);
-    PaintSetHeight(33);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, "Lux", &Font16, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 48, 120, PaintGetWidth(), PaintGetHeight());
-
-  //temperature
-  char temp_string[] = {'0', '0', '.', '0', '0', '\0'};
-#ifdef BME280
-  temp_string[0] = zclSampleSw_Temperature_Sensor_MeasuredValue / 1000 % 10 + '0';
-  temp_string[1] = zclSampleSw_Temperature_Sensor_MeasuredValue / 100 % 10 + '0';
-  temp_string[3] = zclSampleSw_Temperature_Sensor_MeasuredValue / 10 % 10 + '0';
-  temp_string[4] = zclSampleSw_Temperature_Sensor_MeasuredValue % 10 + '0';
-#endif
-  //landscape
-    PaintSetWidth(32);
-    PaintSetHeight(80);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, temp_string, &Font32, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 64, 16, PaintGetWidth(), PaintGetHeight());
-    PaintSetWidth(16);
-    PaintSetHeight(22);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, "^C", &Font16, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 48, 16, PaintGetWidth(), PaintGetHeight());
-
-  //humidity
-  char hum_string[] = {'0', '0', '.', '0', '0', '\0'};
-#ifdef BME280
-  hum_string[0] = zclSampleSw_HumiditySensor_MeasuredValue / 1000 % 10 + '0';
-  hum_string[1] = zclSampleSw_HumiditySensor_MeasuredValue / 100 % 10 + '0';
-  hum_string[3] = zclSampleSw_HumiditySensor_MeasuredValue / 10 % 10 + '0';
-  hum_string[4] = zclSampleSw_HumiditySensor_MeasuredValue % 10 + '0';
-#endif
-  // landscape
-    PaintSetWidth(32);
-    PaintSetHeight(80);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, hum_string, &Font32, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 16, 16, PaintGetWidth(), PaintGetHeight());
-    PaintSetWidth(16);
-    PaintSetHeight(33);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, "%Ha", &Font16, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 1, 16, PaintGetWidth(), PaintGetHeight());
-
-  //pressure
-  char pres_string[] = {'0', '0', '0', '0', '.', '0', '\0'};
-#ifdef BME280
-  pres_string[0] = zclSampleSw_PressureSensor_MeasuredValue / 1000 % 10 + '0';
-  pres_string[1] = zclSampleSw_PressureSensor_MeasuredValue / 100 % 10 + '0';
-  pres_string[2] = zclSampleSw_PressureSensor_MeasuredValue / 10 % 10 + '0';
-  pres_string[3] = zclSampleSw_PressureSensor_MeasuredValue % 10 + '0';
-#endif
-  //landscape
-    PaintSetWidth(32);
-    PaintSetHeight(64);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, pres_string, &Font32, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 16, 120, PaintGetWidth(), PaintGetHeight());
-    PaintSetWidth(16);
-    PaintSetHeight(33);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, "hPa", &Font16, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 1, 120, PaintGetWidth(), PaintGetHeight());
-
-    EpdDisplayFramePartial();
-    OsalPortTimers_startTimer(appServiceTaskId,  SAMPLEAPP_APP_EPD_PARTIAL_EVT, 100);
-
-//  EpdSleep();
-}
-
-#endif
 
 static void zclApp_SetTimeDate(void){
   // Set Time and Date
@@ -3202,6 +2805,61 @@ static void zclSampleSw_processBatteryMeasuremts(void) {
         ADC_close(batteryADC);
     }
 }
+
+#ifdef BME280
+static void zclSampleSw_processBME280Measuremts(void) {
+    zclSampleSw_I2cInit();
+    if (bme280_checkRegisterStatus()) {
+      zclSampleSw_Temperature_Sensor_MeasuredValue = (int16)(bme280_readTemperature() *100);
+      zclSampleSw_HumiditySensor_MeasuredValue = (uint16)(bme280_readHumidity() * 100);
+      zclSampleSw_PressureSensor_MeasuredValue = (int16)bme280_readPressure();
+//                  zclSampleSw_PressureSensor_ScaledValue = (int16) (pow(10.0, (double) zclSampleSw_PressureSensor_Scale) * (double) bme280_readPressure()* 100);
+#ifdef BDB_REPORTING
+      zstack_bdbRepChangedAttrValueReq_t Req1 = {0};
+      Req1.attrID = ATTRID_TEMPERATURE_MEASUREMENT_MEASURED_VALUE;
+      Req1.cluster = ZCL_CLUSTER_ID_MS_TEMPERATURE_MEASUREMENT;
+      Req1.endpoint = SAMPLESW_SENSORENDPOINT;
+      Zstackapi_bdbRepChangedAttrValueReq(appServiceTaskId,&Req1);
+
+      zstack_bdbRepChangedAttrValueReq_t Req2 = {0};
+      Req2.attrID = ATTRID_PRESSURE_MEASUREMENT_MEASURED_VALUE;
+      Req2.cluster = ZCL_CLUSTER_ID_MS_PRESSURE_MEASUREMENT;
+      Req2.endpoint = SAMPLESW_SENSORENDPOINT;
+      Zstackapi_bdbRepChangedAttrValueReq(appServiceTaskId,&Req2);
+
+      zstack_bdbRepChangedAttrValueReq_t Req3 = {0};
+      Req3.attrID = ATTRID_RELATIVITY_HUMIDITY_MEASURED_VALUE;
+      Req3.cluster = ZCL_CLUSTER_ID_MS_RELATIVE_HUMIDITY;
+      Req3.endpoint = SAMPLESW_SENSORENDPOINT;
+      Zstackapi_bdbRepChangedAttrValueReq(appServiceTaskId,&Req3);
+#endif
+#ifndef CUI_DISABLE
+      zclSampleSw_UpdateStatusLine();
+#endif
+    }
+    zclSampleSw_I2cClose();
+}
+#endif //BME280
+
+#ifdef BH1750
+static void zclSampleSw_processBH1750Measuremts(void) {
+    zclSampleSw_I2cInit();
+    zclSampleSw_IlluminanceMeasurment_MeasuredValue = (uint16)(bh1750_Read());
+    bh1750_PowerDown();
+#ifdef BDB_REPORTING
+    zstack_bdbRepChangedAttrValueReq_t Req;
+    Req.attrID = ATTRID_ILLUMINANCE_MEASUREMENT_MEASURED_VALUE;
+    Req.cluster = ZCL_CLUSTER_ID_MS_ILLUMINANCE_MEASUREMENT;
+    Req.endpoint = SAMPLESW_SENSORENDPOINT;
+    Zstackapi_bdbRepChangedAttrValueReq(appServiceTaskId,&Req);
+#endif
+#ifndef CUI_DISABLE
+     zclSampleSw_UpdateStatusLine();
+#endif
+    zclSampleSw_I2cClose();
+
+}
+#endif //BH1750
 
 static uint8_t getBatteryRemainingPercentageZCLCR2032(uint16_t volt16) {
     float battery_level;

@@ -1,6 +1,4 @@
 
-//#include <stdlib.h>
-
 #ifdef EPD1IN54V2
 
 //#include <Application/source/zcl_samplesw.h>
@@ -32,10 +30,30 @@
 #include <imagedata.h>
 #include <epdpaint.h>
 
-#define EPD1IN54V2_TASK_STACK_SIZE 3000
+static void epd1in54v2_initialization(void);
+static uint16_t epd1in54v2_process_loop(void);
 
-void DelayMs(unsigned int delaytime);
-void DelayUs(uint16_t microSecs);
+static    void EpdSpiInit(void);
+static    void EpdSpiClose(void);
+static    void EpdInitFull(void);
+static    void EpdInitPartial(void);
+static    void EpdReset(void);
+
+static    void EpdSetFrameMemoryXY(const unsigned char* image_buffer,int x, int y, int image_width, int image_height);
+static    void EpdSetFrameMemoryImageXY(const unsigned char* image_buffer, int x, int y, int image_width, int image_height, uint8 invert);
+
+static    void EpdSetFrameMemory(const unsigned char* image_buffer);
+static    void EpdSetFrameMemoryBase(const unsigned char* image_buffer, uint8_t invert);
+static    void EpdClearFrameMemory(unsigned char color);
+static    void EpdClearFrameMemoryF(unsigned char color);
+static    void EpdDisplayFrame(void);
+static    void EpdDisplayFramePartial(void);
+static    void EpdSleep(void);
+
+static    void epd1in54Refresh(void);
+
+static void DelayMs(unsigned int delaytime);
+static void DelayUs(uint16_t microSecs);
 
 static void EpdSendCommand(unsigned char command);
 static void EpdSendData(unsigned char data);
@@ -52,8 +70,6 @@ unsigned long epd_height = EPD_HEIGHT;
 const unsigned char lut_full_update[159];
 const unsigned char lut_partial_update[159];
 
-static void epd1in54Refresh(void);
-
 SPI_Handle  spi;
 
 // Semaphore used to post events to the application thread
@@ -66,32 +82,66 @@ static uint32_t epdServiceTaskEvents;
 
 static uint16_t epdEvents = 0;
 
-void epd1in54v2_initialization(Semaphore_Handle appSem, uint8_t stEnt)
+static Semaphore_Struct semStruct;
+
+// Passed in function pointers to the NV driver
+static NVINTF_nvFuncts_t *pfnZdlNV = NULL;
+
+void sampleApp_task_1(NVINTF_nvFuncts_t *pfnNV)
 {
-    epdSemHandle = appSem;
-    epdServiceTaskId = stEnt;
-/*
+  // Save and register the function pointers to the NV drivers
+  pfnZdlNV = pfnNV;
+  zclport_registerNV(pfnZdlNV, ZCL_PORT_SCENE_TABLE_NV_ID);
+
+  // Initialize application
+  epd1in54v2_initialization();
+
+  // No return from task process
+  epd1in54v2_process_loop();
+}
+
+void epd1in54v2_initialization(void)
+{
     //create semaphores for messages / otaClientEvents
-    Semaphore_Struct semStruct;
     Semaphore_Params epdSemParam;
     Semaphore_Params_init(&epdSemParam);
     epdSemParam.mode = ti_sysbios_knl_Semaphore_Mode_COUNTING;
     Semaphore_construct(&semStruct, 0, &epdSemParam);
     epdSemHandle = Semaphore_handle(&semStruct);
-*/
+
     epdServiceTaskId = OsalPort_registerTask(Task_self(), epdSemHandle, &epdServiceTaskEvents);
 
+    // init SPI
+    SPI_init();
+    EpdSpiInit();
+    //init EPD
+    uint8_t zclApp_color = 0xFF;
+    EpdInitFull();
+    EpdClearFrameMemory(zclApp_color);
+    EpdDisplayFrame();
+    EpdClearFrameMemory(zclApp_color);
+    EpdDisplayFrame();
+    EpdInitPartial();
+    epd1in54Refresh();
+
+#ifndef CUI_DISABLE
     OsalPortTimers_startReloadTimer(epdServiceTaskId,  EPD1IN54V2_APP_EPD_DELAY_EVT, 1000);
+#else
+    OsalPortTimers_startReloadTimer(epdServiceTaskId,  EPD1IN54V2_APP_EPD_DELAY_EVT, 60000);
+#endif
 }
 
 uint16_t epd1in54v2_process_loop(void)
 {
-    DisplayFramePartial = epdServiceTaskId;
-
-    if(Semaphore_pend(epdSemHandle, BIOS_WAIT_FOREVER))
-    {
+    /* Forever loop */
+  for(;;)
+  {
+            /* Wait for response message */
+      if(Semaphore_pend(epdSemHandle, BIOS_WAIT_FOREVER))
+      {
             if ( epdServiceTaskEvents & EPD1IN54V2_APP_EPD_DELAY_EVT )
             {
+                EpdSpiInit();
                 epd1in54Refresh();
 
                 epdServiceTaskEvents &= ~EPD1IN54V2_APP_EPD_DELAY_EVT;
@@ -101,16 +151,14 @@ uint16_t epd1in54v2_process_loop(void)
                   if (GPIO_read(CONFIG_GPIO_BUTTON_BUSY_EPD_INPUT) != 1) {
                       OsalPortTimers_stopTimer(epdServiceTaskId,  EPD1IN54V2_APP_EPD_PARTIAL_EVT);
                       EpdSleep();
+                      EpdSpiClose();
                   } else {
                       OsalPortTimers_startTimer(epdServiceTaskId,  EPD1IN54V2_APP_EPD_PARTIAL_EVT, 100);
                   }
-
                   epdServiceTaskEvents &= ~EPD1IN54V2_APP_EPD_PARTIAL_EVT;
             }
-    }
-//    Semaphore_post(epdSemHandle);
-            // Discard unknown epdEvents
-            return 0;
+      }
+  }
 }
 
 void EpdSpiInit(void) {
@@ -554,207 +602,236 @@ void EpdSleep(void) {
     EpdSendData(0x01);
 }
 
-static void epd1in54Refresh(void)
+void epd1in54Refresh(void)
 {
-  EpdReset(); //disable sleep EPD
-  PaintSetInvert(1);
+    EpdReset(); //disable sleep EPD
+    PaintSetInvert(1);
 
-  //status network
-  // landscape
-    if ( bdbAttributes.bdbNodeIsOnANetwork ){
-      EpdSetFrameMemoryImageXY(IMAGE_ONNETWORK, 184, 0, 16, 16, 1);
-    } else {
-      EpdSetFrameMemoryImageXY(IMAGE_OFFNETWORK, 184, 0, 16, 16, 1);
-    }
+      //status network
+      // landscape
+      if ( bdbAttributes.bdbNodeIsOnANetwork ){
+        EpdSetFrameMemoryImageXY(IMAGE_ONNETWORK, 184, 0, 16, 16, 1);
+      } else {
+        EpdSetFrameMemoryImageXY(IMAGE_OFFNETWORK, 184, 0, 16, 16, 1);
+      }
 
-  // clock init Firmware build date 20/08/2021 13:47
-  // Update RTC and get new clock values
-    UTCTimeStruct time;
-    UTC_convertUTCTime(&time, UTC_getClock());
-
-    char time_string[] = {'0', '0', ':', '0', '0', ':', '0', '0','\0'};
-    time_string[0] = time.hour / 10 % 10 + '0';
-    time_string[1] = time.hour % 10 + '0';
-    time_string[3] = time.minutes / 10 % 10 + '0';
-    time_string[4] = time.minutes % 10 + '0';
-    time_string[6] = time.seconds / 10 % 10 + '0';
-    time_string[7] = time.seconds % 10 + '0';
-
-    // covert UTCTimeStruct date and month to display
-    time.day = time.day + 1;
-    time.month = time.month + 1;
-    char date_string[] = {'0', '0', '/', '0', '0', '/', '0', '0', '\0'};
-    date_string[0] = time.day /10 % 10  + '0';
-    date_string[1] = time.day % 10 + '0';
-    date_string[3] = time.month / 10 % 10 + '0';
-    date_string[4] = time.month % 10 + '0';
-    date_string[6] = time.year / 10 % 10 + '0';
-    date_string[7] = time.year % 10 + '0';
-
-    // landscape
-      PaintSetWidth(48);
-      PaintSetHeight(200);
-      PaintSetRotate(ROTATE_90);
-      PaintClear(UNCOLORED);
-      PaintDrawStringAt(0, 4, time_string, &Font48, COLORED);
-      EpdSetFrameMemoryXY(PaintGetImage(), 136, 4, PaintGetWidth(), PaintGetHeight());
-
-    //landscape
+      //percentage
+      char perc_string[] = {' ', ' ', ' ', ' ', '\0'};
+      if (zclSampleSw_PercentageRemainig != 0xFF) {
+        perc_string[0] = zclSampleSw_PercentageRemainig/2 / 100 % 10 + '0';
+        perc_string[1] = zclSampleSw_PercentageRemainig/2 / 10 % 10 + '0';
+        perc_string[2] = zclSampleSw_PercentageRemainig/2 % 10 + '0';
+        perc_string[3] = '%';
+      }
       PaintSetWidth(16);
-      PaintSetHeight(100);
+      PaintSetHeight(48);
       PaintSetRotate(ROTATE_90);
       PaintClear(UNCOLORED);
-      PaintDrawStringAt(10, 0, date_string, &Font16, COLORED);
-      EpdSetFrameMemoryXY(PaintGetImage(), 120, 100, PaintGetWidth(), PaintGetHeight());
+      PaintDrawStringAt(0, 0, perc_string, &Font16, COLORED);
+      EpdSetFrameMemoryXY(PaintGetImage(), 184, 144, PaintGetWidth(), PaintGetHeight());
+      if (zclSampleSw_PercentageRemainig != 0xFF) {
+        if(zclSampleSw_PercentageRemainig/2 > 75){
+          EpdSetFrameMemoryImageXY(IMAGE_BATTERY_100, 184, 116, 16, 25, 1);
+        } else if (zclSampleSw_PercentageRemainig/2 <= 75 && zclSampleSw_PercentageRemainig/2 > 50) {
+          EpdSetFrameMemoryImageXY(IMAGE_BATTERY_75, 184, 116, 16, 25, 1);
+        } else if (zclSampleSw_PercentageRemainig/2 <= 50 && zclSampleSw_PercentageRemainig/2 > 25) {
+          EpdSetFrameMemoryImageXY(IMAGE_BATTERY_50, 184, 116, 16, 25, 1);
+        } else if (zclSampleSw_PercentageRemainig/2 <= 25 && zclSampleSw_PercentageRemainig/2 > 6) {
+          EpdSetFrameMemoryImageXY(IMAGE_BATTERY_25, 184, 116, 16, 25, 1);
+        } else if (zclSampleSw_PercentageRemainig/2 <= 6 && zclSampleSw_PercentageRemainig/2 > 0) {
+          EpdSetFrameMemoryImageXY(IMAGE_BATTERY_0, 184, 116, 16, 25, 1);
+        }
+      }
 
-//    uint8 day_week = (uint16)floor((float)(zclSampleSw_GenTime_TimeUTC/86400)) % 7;
-    uint8 day_week = (uint16)(float)(zclSampleSw_GenTime_TimeUTC/86400) % 7;
-    char* day_string = "";
-    if (day_week == 5) {
-      day_string = "Thursday";
-    } else if (day_week == 6) {
-      day_string = " Friday ";
-    } else if (day_week == 0) {
-      day_string = "Saturday";
-    } else if (day_week == 1) {
-      day_string = " Sunday";
-    } else if (day_week == 2) {
-      day_string = " Monday";
-    } else if (day_week == 3) {
-      day_string = "Tuesday";
-    } else if (day_week == 4) {
-      day_string = "Wednesday";
-    }
+    // clock init Firmware build date 20/08/2021 13:47
+    // Update RTC and get new clock values
+      UTCTimeStruct time;
+      UTC_convertUTCTime(&time, UTC_getClock());
 
-    //landscape
-      PaintSetWidth(16);
-      PaintSetHeight(100);
-      PaintSetRotate(ROTATE_90);
-      PaintClear(UNCOLORED);
-      PaintDrawStringAt(0, 0, day_string, &Font16, COLORED);
-      EpdSetFrameMemoryXY(PaintGetImage(), 120, 4, PaintGetWidth(), PaintGetHeight());
+      char time_string[] = {'0', '0', ':', '0', '0', ':', '0', '0','\0'};
+      time_string[0] = time.hour / 10 % 10 + '0';
+      time_string[1] = time.hour % 10 + '0';
+      time_string[3] = time.minutes / 10 % 10 + '0';
+      time_string[4] = time.minutes % 10 + '0';
+      time_string[6] = time.seconds / 10 % 10 + '0';
+      time_string[7] = time.seconds % 10 + '0';
 
-      //OTA status
-      char ota_string[] = {'O','T','A', ':', ' ', ' ', ' ', ' ', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '\0'};
-      uint32_t progress = (uint32_t)((100 * zclSampleSw_FileOffset) / zclOTA_DownloadedImageSize);
-      ota_string[4] = progress / 100 % 10 + '0';
-      ota_string[5] = progress / 10 % 10 + '0';
-      ota_string[6] = progress % 10 + '0';
+      // covert UTCTimeStruct date and month to display
+      time.day = time.day + 1;
+      time.month = time.month + 1;
+      char date_string[] = {'0', '0', '/', '0', '0', '/', '0', '0', '\0'};
+      date_string[0] = time.day /10 % 10  + '0';
+      date_string[1] = time.day % 10 + '0';
+      date_string[3] = time.month / 10 % 10 + '0';
+      date_string[4] = time.month % 10 + '0';
+      date_string[6] = time.year / 10 % 10 + '0';
+      date_string[7] = time.year % 10 + '0';
 
-      if (progress >= 10) { ota_string[8] = '#'; }
-      if (progress >= 20) { ota_string[9] = '#'; }
-      if (progress >= 30) { ota_string[10] = '#'; }
-      if (progress >= 40) { ota_string[11] = '#'; }
-      if (progress >= 50) { ota_string[12] = '#'; }
-      if (progress >= 60) { ota_string[13] = '#'; }
-      if (progress >= 70) { ota_string[14] = '#'; }
-      if (progress >= 80) { ota_string[15] = '#'; }
-      if (progress >= 90) { ota_string[16] = '#'; }
-      if (progress == 100) { ota_string[17] = '#'; }
-
-      if (zclSampleSw_ImageUpgradeStatus == OTA_STATUS_IN_PROGRESS) {
-      //landscape
-        PaintSetWidth(16);
+      // landscape
+        PaintSetWidth(48);
         PaintSetHeight(200);
         PaintSetRotate(ROTATE_90);
         PaintClear(UNCOLORED);
-        PaintDrawStringAt(0, 0, ota_string, &Font16, COLORED);
-        EpdSetFrameMemoryXY(PaintGetImage(), 104, 4, PaintGetWidth(), PaintGetHeight());
+        PaintDrawStringAt(0, 4, time_string, &Font48, COLORED);
+        EpdSetFrameMemoryXY(PaintGetImage(), 136, 4, PaintGetWidth(), PaintGetHeight());
+
+      //landscape
+        PaintSetWidth(16);
+        PaintSetHeight(100);
+        PaintSetRotate(ROTATE_90);
+        PaintClear(UNCOLORED);
+        PaintDrawStringAt(10, 0, date_string, &Font16, COLORED);
+        EpdSetFrameMemoryXY(PaintGetImage(), 120, 100, PaintGetWidth(), PaintGetHeight());
+
+  //    uint8 day_week = (uint16)floor((float)(zclSampleSw_GenTime_TimeUTC/86400)) % 7;
+      uint8 day_week = (uint16)(float)(zclSampleSw_GenTime_TimeUTC/86400) % 7;
+      char* day_string = "";
+      if (day_week == 5) {
+        day_string = "Thursday";
+      } else if (day_week == 6) {
+        day_string = " Friday ";
+      } else if (day_week == 0) {
+        day_string = "Saturday";
+      } else if (day_week == 1) {
+        day_string = " Sunday";
+      } else if (day_week == 2) {
+        day_string = " Monday";
+      } else if (day_week == 3) {
+        day_string = "Tuesday";
+      } else if (day_week == 4) {
+        day_string = "Wednesday";
       }
 
-  //Illuminance
-  char illum_string[] = {'0','0', '0', '0', '0', '\0'};
-#ifdef BH1750
-  illum_string[0] = zclSampleSw_IlluminanceMeasurment_MeasuredValue / 10000 % 10 + '0';
-  illum_string[1] = zclSampleSw_IlluminanceMeasurment_MeasuredValue / 1000 % 10 + '0';
-  illum_string[2] = zclSampleSw_IlluminanceMeasurment_MeasuredValue / 100 % 10 + '0';
-  illum_string[3] = zclSampleSw_IlluminanceMeasurment_MeasuredValue / 10 % 10 + '0';
-  illum_string[4] = zclSampleSw_IlluminanceMeasurment_MeasuredValue % 10 + '0';
-#endif
-  //landscape
-    PaintSetWidth(32);
-    PaintSetHeight(80);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, illum_string, &Font32, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 64, 120, PaintGetWidth(), PaintGetHeight());
-    PaintSetWidth(16);
-    PaintSetHeight(33);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, "Lux", &Font16, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 48, 120, PaintGetWidth(), PaintGetHeight());
+      //landscape
+        PaintSetWidth(16);
+        PaintSetHeight(100);
+        PaintSetRotate(ROTATE_90);
+        PaintClear(UNCOLORED);
+        PaintDrawStringAt(0, 0, day_string, &Font16, COLORED);
+        EpdSetFrameMemoryXY(PaintGetImage(), 120, 4, PaintGetWidth(), PaintGetHeight());
 
-  //temperature
-  char temp_string[] = {'0', '0', '.', '0', '0', '\0'};
-#ifdef BME280
-  temp_string[0] = zclSampleSw_Temperature_Sensor_MeasuredValue / 1000 % 10 + '0';
-  temp_string[1] = zclSampleSw_Temperature_Sensor_MeasuredValue / 100 % 10 + '0';
-  temp_string[3] = zclSampleSw_Temperature_Sensor_MeasuredValue / 10 % 10 + '0';
-  temp_string[4] = zclSampleSw_Temperature_Sensor_MeasuredValue % 10 + '0';
-#endif
-  //landscape
-    PaintSetWidth(32);
-    PaintSetHeight(80);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, temp_string, &Font32, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 64, 16, PaintGetWidth(), PaintGetHeight());
-    PaintSetWidth(16);
-    PaintSetHeight(22);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, "^C", &Font16, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 48, 16, PaintGetWidth(), PaintGetHeight());
+        //OTA status
+        char ota_string[] = {'O','T','A', ':', ' ', ' ', ' ', ' ', '_', '_', '_', '_', '_', '_', '_', '_', '_', '_', '\0'};
+        uint32_t progress = (uint32_t)((100 * zclSampleSw_FileOffset) / zclOTA_DownloadedImageSize);
+        ota_string[4] = progress / 100 % 10 + '0';
+        ota_string[5] = progress / 10 % 10 + '0';
+        ota_string[6] = progress % 10 + '0';
 
-  //humidity
-  char hum_string[] = {'0', '0', '.', '0', '0', '\0'};
-#ifdef BME280
-  hum_string[0] = zclSampleSw_HumiditySensor_MeasuredValue / 1000 % 10 + '0';
-  hum_string[1] = zclSampleSw_HumiditySensor_MeasuredValue / 100 % 10 + '0';
-  hum_string[3] = zclSampleSw_HumiditySensor_MeasuredValue / 10 % 10 + '0';
-  hum_string[4] = zclSampleSw_HumiditySensor_MeasuredValue % 10 + '0';
-#endif
-  // landscape
-    PaintSetWidth(32);
-    PaintSetHeight(80);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, hum_string, &Font32, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 16, 16, PaintGetWidth(), PaintGetHeight());
-    PaintSetWidth(16);
-    PaintSetHeight(33);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, "%Ha", &Font16, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 1, 16, PaintGetWidth(), PaintGetHeight());
+        if (progress >= 10) { ota_string[8] = '#'; }
+        if (progress >= 20) { ota_string[9] = '#'; }
+        if (progress >= 30) { ota_string[10] = '#'; }
+        if (progress >= 40) { ota_string[11] = '#'; }
+        if (progress >= 50) { ota_string[12] = '#'; }
+        if (progress >= 60) { ota_string[13] = '#'; }
+        if (progress >= 70) { ota_string[14] = '#'; }
+        if (progress >= 80) { ota_string[15] = '#'; }
+        if (progress >= 90) { ota_string[16] = '#'; }
+        if (progress == 100) { ota_string[17] = '#'; }
 
-  //pressure
-  char pres_string[] = {'0', '0', '0', '0', '.', '0', '\0'};
-#ifdef BME280
-  pres_string[0] = zclSampleSw_PressureSensor_MeasuredValue / 1000 % 10 + '0';
-  pres_string[1] = zclSampleSw_PressureSensor_MeasuredValue / 100 % 10 + '0';
-  pres_string[2] = zclSampleSw_PressureSensor_MeasuredValue / 10 % 10 + '0';
-  pres_string[3] = zclSampleSw_PressureSensor_MeasuredValue % 10 + '0';
-#endif
-  //landscape
-    PaintSetWidth(32);
-    PaintSetHeight(64);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, pres_string, &Font32, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 16, 120, PaintGetWidth(), PaintGetHeight());
-    PaintSetWidth(16);
-    PaintSetHeight(33);
-    PaintSetRotate(ROTATE_90);
-    PaintClear(UNCOLORED);
-    PaintDrawStringAt(0, 0, "hPa", &Font16, COLORED);
-    EpdSetFrameMemoryXY(PaintGetImage(), 1, 120, PaintGetWidth(), PaintGetHeight());
+        if (zclSampleSw_ImageUpgradeStatus == OTA_STATUS_IN_PROGRESS) {
+        //landscape
+          PaintSetWidth(16);
+          PaintSetHeight(200);
+          PaintSetRotate(ROTATE_90);
+          PaintClear(UNCOLORED);
+          PaintDrawStringAt(0, 0, ota_string, &Font16, COLORED);
+          EpdSetFrameMemoryXY(PaintGetImage(), 104, 4, PaintGetWidth(), PaintGetHeight());
+        }
 
-    EpdDisplayFramePartial();
+    //Illuminance
+    char illum_string[] = {'0','0', '0', '0', '0', '\0'};
+  #ifdef BH1750
+    illum_string[0] = zclSampleSw_IlluminanceMeasurment_MeasuredValue / 10000 % 10 + '0';
+    illum_string[1] = zclSampleSw_IlluminanceMeasurment_MeasuredValue / 1000 % 10 + '0';
+    illum_string[2] = zclSampleSw_IlluminanceMeasurment_MeasuredValue / 100 % 10 + '0';
+    illum_string[3] = zclSampleSw_IlluminanceMeasurment_MeasuredValue / 10 % 10 + '0';
+    illum_string[4] = zclSampleSw_IlluminanceMeasurment_MeasuredValue % 10 + '0';
+  #endif
+    //landscape
+      PaintSetWidth(32);
+      PaintSetHeight(80);
+      PaintSetRotate(ROTATE_90);
+      PaintClear(UNCOLORED);
+      PaintDrawStringAt(0, 0, illum_string, &Font32, COLORED);
+      EpdSetFrameMemoryXY(PaintGetImage(), 64, 120, PaintGetWidth(), PaintGetHeight());
+      PaintSetWidth(16);
+      PaintSetHeight(33);
+      PaintSetRotate(ROTATE_90);
+      PaintClear(UNCOLORED);
+      PaintDrawStringAt(0, 0, "Lux", &Font16, COLORED);
+      EpdSetFrameMemoryXY(PaintGetImage(), 48, 120, PaintGetWidth(), PaintGetHeight());
+
+    //temperature
+    char temp_string[] = {'0', '0', '.', '0', '0', '\0'};
+  #ifdef BME280
+    temp_string[0] = zclSampleSw_Temperature_Sensor_MeasuredValue / 1000 % 10 + '0';
+    temp_string[1] = zclSampleSw_Temperature_Sensor_MeasuredValue / 100 % 10 + '0';
+    temp_string[3] = zclSampleSw_Temperature_Sensor_MeasuredValue / 10 % 10 + '0';
+    temp_string[4] = zclSampleSw_Temperature_Sensor_MeasuredValue % 10 + '0';
+  #endif
+    //landscape
+      PaintSetWidth(32);
+      PaintSetHeight(80);
+      PaintSetRotate(ROTATE_90);
+      PaintClear(UNCOLORED);
+      PaintDrawStringAt(0, 0, temp_string, &Font32, COLORED);
+      EpdSetFrameMemoryXY(PaintGetImage(), 64, 16, PaintGetWidth(), PaintGetHeight());
+      PaintSetWidth(16);
+      PaintSetHeight(22);
+      PaintSetRotate(ROTATE_90);
+      PaintClear(UNCOLORED);
+      PaintDrawStringAt(0, 0, "^C", &Font16, COLORED);
+      EpdSetFrameMemoryXY(PaintGetImage(), 48, 16, PaintGetWidth(), PaintGetHeight());
+
+    //humidity
+    char hum_string[] = {'0', '0', '.', '0', '0', '\0'};
+  #ifdef BME280
+    hum_string[0] = zclSampleSw_HumiditySensor_MeasuredValue / 1000 % 10 + '0';
+    hum_string[1] = zclSampleSw_HumiditySensor_MeasuredValue / 100 % 10 + '0';
+    hum_string[3] = zclSampleSw_HumiditySensor_MeasuredValue / 10 % 10 + '0';
+    hum_string[4] = zclSampleSw_HumiditySensor_MeasuredValue % 10 + '0';
+  #endif
+    // landscape
+      PaintSetWidth(32);
+      PaintSetHeight(80);
+      PaintSetRotate(ROTATE_90);
+      PaintClear(UNCOLORED);
+      PaintDrawStringAt(0, 0, hum_string, &Font32, COLORED);
+      EpdSetFrameMemoryXY(PaintGetImage(), 16, 16, PaintGetWidth(), PaintGetHeight());
+      PaintSetWidth(16);
+      PaintSetHeight(33);
+      PaintSetRotate(ROTATE_90);
+      PaintClear(UNCOLORED);
+      PaintDrawStringAt(0, 0, "%Ha", &Font16, COLORED);
+      EpdSetFrameMemoryXY(PaintGetImage(), 1, 16, PaintGetWidth(), PaintGetHeight());
+
+    //pressure
+    char pres_string[] = {'0', '0', '0', '0', '.', '0', '\0'};
+  #ifdef BME280
+    pres_string[0] = zclSampleSw_PressureSensor_MeasuredValue / 1000 % 10 + '0';
+    pres_string[1] = zclSampleSw_PressureSensor_MeasuredValue / 100 % 10 + '0';
+    pres_string[2] = zclSampleSw_PressureSensor_MeasuredValue / 10 % 10 + '0';
+    pres_string[3] = zclSampleSw_PressureSensor_MeasuredValue % 10 + '0';
+  #endif
+    //landscape
+      PaintSetWidth(32);
+      PaintSetHeight(64);
+      PaintSetRotate(ROTATE_90);
+      PaintClear(UNCOLORED);
+      PaintDrawStringAt(0, 0, pres_string, &Font32, COLORED);
+      EpdSetFrameMemoryXY(PaintGetImage(), 16, 120, PaintGetWidth(), PaintGetHeight());
+      PaintSetWidth(16);
+      PaintSetHeight(33);
+      PaintSetRotate(ROTATE_90);
+      PaintClear(UNCOLORED);
+      PaintDrawStringAt(0, 0, "hPa", &Font16, COLORED);
+      EpdSetFrameMemoryXY(PaintGetImage(), 1, 120, PaintGetWidth(), PaintGetHeight());
+
+      EpdDisplayFramePartial();
+  //    OsalPortTimers_startTimer(appServiceTaskId,  SAMPLEAPP_APP_EPD_PARTIAL_EVT, 100);
     OsalPortTimers_startTimer(epdServiceTaskId,  EPD1IN54V2_APP_EPD_PARTIAL_EVT, 100);
 
-//  EpdSleep();
+  //  EpdSleep();
 }
 
 #endif //end EPD1IN54V2

@@ -226,6 +226,16 @@
 			<locationURI>PROJ_LOC/source/fonts.h</locationURI>
 		</link>
 		<link>
+			<name>Application/source/imagedata.c</name>
+			<type>1</type>
+			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/source/imagedata.c</location>
+		</link>
+		<link>
+			<name>Application/source/imagedata.h</name>
+			<type>1</type>
+			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/source/imagedata.h</location>
+		</link>
+		<link>
 			<name>Application/source/zcl_sample_app_def.h</name>
 			<type>1</type>
 			<locationURI>PROJ_LOC/source/zcl_sample_app_def.h</locationURI>

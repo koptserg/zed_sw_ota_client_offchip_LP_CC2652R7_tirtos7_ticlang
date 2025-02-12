@@ -101,9 +101,6 @@ extern "C"
 
 #if defined (BH1750) || defined (BME280)
 #define SAMPLEAPP_SENSOR_START_EVT          0x0020
-#ifdef CUSTOM_TASK
-#define SAMPLEAPP_SENSOR_START_EVT_1      0x0001
-#endif //CUSTOM_TASK
 #endif
 
 #ifdef BH1750
@@ -112,10 +109,7 @@ extern "C"
 #ifdef BME280
 #define SAMPLEAPP_BME280_SEND_EVT         0x0080
 #endif
-#ifdef EPD1IN54V2
-#define SAMPLEAPP_APP_EPD_PARTIAL_EVT       0x1000
-#define SAMPLEAPP_APP_EPD_DELAY_EVT       0x2000
-#endif
+
 #ifdef CUI_DISABLE
 #define SAMPLEAPP_KEY_EVT         0x4000
 #endif
@@ -183,7 +177,6 @@ extern int16_t zclSampleSw_PressureSensor_ScaledValue;
 extern int8_t zclSampleSw_PressureSensor_Scale;
 #endif
 
-extern uint32_t DisplayFramePartial;
 extern uint32_t zclSampleSw_GenTime_TimeUTC;
 
 extern uint8_t zclSampleSw_batteryVoltage;

@@ -50,26 +50,6 @@
 extern    unsigned long epd_width;
 extern    unsigned long epd_height;
 
-extern void epd1in54v2_initialization(Semaphore_Handle appSem, uint8_t stEnt);
-extern uint16_t epd1in54v2_process_loop(void);
-
-extern    void EpdSpiInit(void);
-extern    void EpdSpiClose(void);
-extern    void EpdInitFull(void);
-extern    void EpdInitPartial(void);
-extern    void EpdReset(void);
-
-extern    void EpdSetFrameMemoryXY(const unsigned char* image_buffer,int x, int y, int image_width, int image_height);
-extern    void EpdSetFrameMemoryImageXY(const unsigned char* image_buffer, int x, int y, int image_width, int image_height, uint8 invert);
-
-extern    void EpdSetFrameMemory(const unsigned char* image_buffer);
-extern    void EpdSetFrameMemoryBase(const unsigned char* image_buffer, uint8_t invert);
-extern    void EpdClearFrameMemory(unsigned char color);
-extern    void EpdClearFrameMemoryF(unsigned char color);
-extern    void EpdDisplayFrame(void);
-extern    void EpdDisplayFramePartial(void);
-extern    void EpdSleep(void);
-
 #endif /* EPD1IN54V2_H */
 
 /* END OF FILE */
