@@ -2439,7 +2439,7 @@ static void zclSampleSw_processKey(uint8_t key, Button_EventMask buttonEvents)
         }
         if(key ==  CONFIG_BTN_LEFT)
         {
-            zclSampleSw_SendTime_CmdLocalTime();
+          zclSampleSw_SendTime_CmdLocalTime();
 #ifdef BH1750
           zclSampleSw_BH1750IlluminanceReport();
 #endif
@@ -2479,8 +2479,8 @@ static void zclSampleSw_processKey(Button_Handle key, Button_EventMask buttonEve
     {
         if(key == gLeftButtonHandle)
         {
-            BLINK_ONCE(gGreenLedHandle);
-            zclSampleSw_SendTime_CmdLocalTime();
+          BLINK_ONCE(gGreenLedHandle);
+          zclSampleSw_SendTime_CmdLocalTime();
 #ifdef BH1750
           zclSampleSw_BH1750IlluminanceReport();
 #endif

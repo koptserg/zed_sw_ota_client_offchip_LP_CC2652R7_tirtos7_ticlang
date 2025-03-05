@@ -144,7 +144,7 @@
 									<listOptionValue builtIn="false" value="BDB_REPORTING"/>
 									<listOptionValue builtIn="false" value="ZCL_REPORT_DESTINATION_DEVICE"/>
 									<listOptionValue builtIn="false" value="TIMAC_ROM_PATCH"/>
-									<listOptionValue builtIn="false" value="xCUI_DISABLE"/>
+									<listOptionValue builtIn="false" value="CUI_DISABLE"/>
 									<listOptionValue builtIn="false" value="SAMPLEAPP_UI_MAX_STATUS_LINES=13"/>
 									<listOptionValue builtIn="false" value="xMAX_STATUS_LINES=10"/>
 									<listOptionValue builtIn="false" value="ZSTACK_SECURITY"/>

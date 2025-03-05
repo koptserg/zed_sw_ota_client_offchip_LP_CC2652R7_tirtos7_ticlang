@@ -10,7 +10,8 @@
 #define CONFIG_LED_RST_EPD_GPIO 0 // DIO0
 
 #define EPD1IN54V2_APP_EPD_PARTIAL_EVT       0x1000
-#define EPD1IN54V2_APP_EPD_DELAY_EVT       0x2000
+#define EPD1IN54V2_APP_EPD_DELAY_EVT         0x2000
+#define EPD1IN54V2_APP_KEY_EVT               0x4000
 
 // Display resolution
 #define EPD_WIDTH       200
@@ -49,6 +50,13 @@
 
 extern    unsigned long epd_width;
 extern    unsigned long epd_height;
+
+/* App service ID used for messaging with stack service task */
+//extern    uint8_t  epdServiceTaskId;
+
+//extern void epd1in54Refresh(void);
+
+//extern void epd1in54v2_processKey(Button_Handle key, Button_EventMask buttonEvents);
 
 #endif /* EPD1IN54V2_H */
 

@@ -21,6 +21,9 @@
 // TI Drivers Configuration
 #include "ti_drivers_config.h"
 
+#include <ti/drivers/apps/Button.h>
+#include <ti/drivers/apps/LED.h>
+
 #include <ti/drivers/SPI.h>
 
 //#include <Application/source/epd1in54v2.h>
@@ -29,6 +32,9 @@
 #include <epd1in54v2.h>
 #include <imagedata.h>
 #include <epdpaint.h>
+
+//UI definitions
+#define BLINK_ONCE(ledHandle) {LED_setOn(ledHandle, 80); LED_startBlinking(ledHandle, 200, 1);}
 
 static void epd1in54v2_initialization(void);
 static uint16_t epd1in54v2_process_loop(void);
@@ -64,6 +70,12 @@ static void EpdSetLutFull(const unsigned char *lut);
 static void EpdSetMemoryArea(int x_start, int y_start, int x_end, int y_end);
 static void EpdSetMemoryPointer(int x, int y);
 
+static void epd1in54v2_ButtonInit(void);
+void epd1in54v2_processKey(Button_Handle key, Button_EventMask buttonEvents);
+static void epd1in54v2_changeKeyCallback(Button_Handle _buttonHandle, Button_EventMask _buttonEvents);
+
+static void epd1in54v2_LedInit(void);
+
 unsigned long epd_width = EPD_WIDTH;
 unsigned long epd_height = EPD_HEIGHT;
 
@@ -83,6 +95,13 @@ static uint32_t epdServiceTaskEvents;
 static uint16_t epdEvents = 0;
 
 static Semaphore_Struct semStruct;
+
+static Button_Handle keys;
+static Button_EventMask keys_events;
+static Button_Handle gRightButtonHandle;
+static Button_Handle gLeftButtonHandle;
+static LED_Handle gRedLedHandle;
+static LED_Handle gGreenLedHandle;
 
 // Passed in function pointers to the NV driver
 static NVINTF_nvFuncts_t *pfnZdlNV = NULL;
@@ -110,6 +129,11 @@ void epd1in54v2_initialization(void)
     epdSemHandle = Semaphore_handle(&semStruct);
 
     epdServiceTaskId = OsalPort_registerTask(Task_self(), epdSemHandle, &epdServiceTaskEvents);
+
+    //Request the LED for App
+//    epd1in54v2_LedInit();
+    /* Initialize btns */
+//    epd1in54v2_ButtonInit();
 
     // init SPI
     SPI_init();
@@ -156,6 +180,13 @@ uint16_t epd1in54v2_process_loop(void)
                       OsalPortTimers_startTimer(epdServiceTaskId,  EPD1IN54V2_APP_EPD_PARTIAL_EVT, 100);
                   }
                   epdServiceTaskEvents &= ~EPD1IN54V2_APP_EPD_PARTIAL_EVT;
+            }
+            if (epdServiceTaskEvents & EPD1IN54V2_APP_KEY_EVT)
+            {
+               epd1in54v2_processKey(keys, keys_events);
+               keys = NULL;
+               keys_events = 0;
+              epdServiceTaskEvents &= ~EPD1IN54V2_APP_KEY_EVT;
             }
       }
   }
@@ -832,6 +863,57 @@ void epd1in54Refresh(void)
     OsalPortTimers_startTimer(epdServiceTaskId,  EPD1IN54V2_APP_EPD_PARTIAL_EVT, 100);
 
   //  EpdSleep();
+}
+
+void epd1in54v2_processKey(Button_Handle key, Button_EventMask buttonEvents)
+{
+    if (buttonEvents & Button_EV_CLICKED)
+    {
+        if(key == gLeftButtonHandle)
+        {
+            BLINK_ONCE(gRedLedHandle);
+
+            OsalPortTimers_startTimer(epdServiceTaskId,  EPD1IN54V2_APP_EPD_DELAY_EVT, 100);
+        }
+
+    }
+}
+
+static void epd1in54v2_ButtonInit(void)
+{
+    /* Initialize btns */
+    Button_Params bparams;
+    Button_Params_init(&bparams);
+    bparams.longPressDuration = 3000;
+    gLeftButtonHandle = Button_open(CONFIG_BTN_LEFT, &bparams);
+    gRightButtonHandle = Button_open(CONFIG_BTN_RIGHT, &bparams);
+    // Set button callback
+    Button_setCallback(gLeftButtonHandle, epd1in54v2_changeKeyCallback);
+    Button_setCallback(gRightButtonHandle, epd1in54v2_changeKeyCallback);
+}
+
+static void epd1in54v2_changeKeyCallback(Button_Handle _buttonHandle, Button_EventMask _buttonEvents)
+{
+        keys = _buttonHandle;
+        keys_events = _buttonEvents;
+
+        epdServiceTaskEvents |= EPD1IN54V2_APP_KEY_EVT;
+
+        // Wake up the application thread when it waits for clock event
+        Semaphore_post(epdSemHandle);
+}
+
+static void epd1in54v2_LedInit(void)
+{
+    //Request the Red LED for App
+    LED_Params redLedParams;
+    LED_Params_init(&redLedParams);
+    gRedLedHandle = LED_open(CONFIG_LED_RED, &redLedParams);
+
+    //Request the Green LED for App
+    LED_Params greenLedParams;
+    LED_Params_init(&greenLedParams);
+    gGreenLedHandle = LED_open(CONFIG_LED_GREEN, &greenLedParams);
 }
 
 #endif //end EPD1IN54V2

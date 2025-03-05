@@ -79,6 +79,7 @@ extern "C"
 #include "zcl.h"
 #include "nvintf.h"
 
+#include <ti/drivers/apps/Button.h>
 /*********************************************************************
  * CONSTANTS
  */

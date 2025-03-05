@@ -109,15 +109,11 @@ SPI2.spi.picoPin.$assign = "boosterpack.26";
 
 TRNG1.$name = "CONFIG_TRNG_0";
 
-Button1.$name         = "CONFIG_BTN_LEFT";
-Button1.$hardware     = system.deviceData.board.components["BTN-1"];
-Button1.gpioPin.$name = "CONFIG_GPIO_BTN1";
-Button1.gpioPin.pull  = "Pull Up";
+Button1.$hardware = system.deviceData.board.components["BTN-1"];
+Button1.$name     = "CONFIG_BTN_LEFT";
 
-Button2.$name         = "CONFIG_BTN_RIGHT";
-Button2.$hardware     = system.deviceData.board.components["BTN-2"];
-Button2.gpioPin.$name = "CONFIG_GPIO_BTN2";
-Button2.gpioPin.pull  = "Pull Up";
+Button2.$hardware = system.deviceData.board.components["BTN-2"];
+Button2.$name     = "CONFIG_BTN_RIGHT";
 
 LED1.$name         = "CONFIG_LED_RED";
 LED1.$hardware     = system.deviceData.board.components.LED_RED;
