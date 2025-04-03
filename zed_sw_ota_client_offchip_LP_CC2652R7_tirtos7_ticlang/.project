@@ -228,12 +228,12 @@
 		<link>
 			<name>Application/source/imagedata.c</name>
 			<type>1</type>
-			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/source/imagedata.c</location>
+			<locationURI>PROJ_LOC/source/imagedata.c</locationURI>
 		</link>
 		<link>
 			<name>Application/source/imagedata.h</name>
 			<type>1</type>
-			<location>C:/Users/real/git/zed_sw_ota_client_offchip_LP_CC2652R7_tirtos7_ticlang/source/imagedata.h</location>
+			<locationURI>PROJ_LOC/source/imagedata.h</locationURI>
 		</link>
 		<link>
 			<name>Application/source/zcl_sample_app_def.h</name>
