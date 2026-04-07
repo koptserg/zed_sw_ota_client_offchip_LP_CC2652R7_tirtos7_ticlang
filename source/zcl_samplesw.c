@@ -140,6 +140,12 @@
 #include <ti/drivers/SPI.h>
 #include <ti/drivers/ADC.h>
 #include "util_timer.h"
+#include <log/Log.h>
+
+#ifdef SHARP128
+#include <sharp128.h>
+#endif
+
 #ifdef BH1750
 //#include <Application/source/bh1750.h>
 #include <bh1750.h>
@@ -307,6 +313,7 @@ uint8 BH1750_mode = ONE_TIME_HIGH_RES_MODE;
 #endif
 
 I2C_Handle i2cHandle;
+
 /*********************************************************************
  * LOCAL FUNCTIONS
  */
@@ -619,6 +626,10 @@ static void zclSampleSw_initialization(void)
 #endif
 #if defined (BH1750) || defined (BME280)
   zclSampleSw_I2cClose();
+#endif
+
+#ifdef SHARP128
+  Sharp128_Init();
 #endif
 
   zclApp_SetTimeDate();
@@ -2432,6 +2443,7 @@ static void zclSampleSw_processKey(uint8_t key, Button_EventMask buttonEvents)
     {
         if(key == CONFIG_BTN_RIGHT)
         {
+            Log_printf(LogModule0, Log_DEBUG, "Hello world");
             zstack_getZCLFrameCounterRsp_t rsp;
 
             Zstackapi_getZCLFrameCounterReq(appServiceTaskId, &rsp);
@@ -2448,6 +2460,12 @@ static void zclSampleSw_processKey(uint8_t key, Button_EventMask buttonEvents)
           zclSampleSw_BME280PressureReport();
           zclSampleSw_BME280HumidityReport();
           zclSampleSw_BatteryReport();
+#endif
+#ifdef SHARP128
+          Display_printf(hDisplay, 5, 3, "Temperature %d", zclSampleSw_Temperature_Sensor_MeasuredValue);
+          Display_printf(hDisplay, 7, 3, "Humidity    %d", zclSampleSw_HumiditySensor_MeasuredValue);
+          Display_printf(hDisplay, 9, 3, "Pressure    %d", zclSampleSw_PressureSensor_MeasuredValue);
+          Display_printf(hDisplay, 11, 3, "Illuminance %d", zclSampleSw_IlluminanceMeasurment_MeasuredValue);
 #endif
         }
     }
